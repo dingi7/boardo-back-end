@@ -5,7 +5,6 @@ import { ISession } from '../../interfaces/Session';
 import jsonwebtoken from 'jsonwebtoken';
 import { IUser } from '../../interfaces/User';
 import { AuthContext } from '../../interfaces/AuthContext';
-import {} from '../../interfaces/ErrorResponse';
 const JWT_SECRET = process.env.JWT_SECRET || 'process.env.JWT_SECRET;';
 
 async function validatePassword(inputPassword: string, storedPassword: string) {
@@ -38,20 +37,17 @@ async function registerUser(userPayload: RegisterPayload) {
 }
 
 async function loginUser(userPayload: RegisterPayload) {
-    let user;
-
     const userByUsername = await User.findOne({
         username: userPayload.username,
     });
-    if (userByUsername) {
-        user = userByUsername;
-    } else {
-        user = await User.findOne({ email: userPayload.email });
-    }
+    const userByEmail = await User.findOne({ email: userPayload.email });
+
+    const user = userByUsername || userByEmail;
 
     if (!user) {
         throw new Error('User not found');
     }
+
     await validatePassword(userPayload.password, user.hashedPassword);
     return createSession(user);
 }
