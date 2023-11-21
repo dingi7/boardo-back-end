@@ -6,6 +6,7 @@ async function createOrg(name: string, password: string, owner: string) {
         name: name,
         password: password,
         owner: owner,
+        members: [owner],
     });
     await org.save();
     const user = await getUserById(owner);
@@ -22,10 +23,13 @@ async function joinOrg(orgId: string, orgPassword: string, userId: string) {
     if (org.password !== orgPassword) {
         throw new Error('Wrong password');
     }
+    if(org.members.includes(userId as any)) {
+        throw new Error('User already in the organization');
+    }
     org.members.push(userId);
     await org.save();
     const user = await getUserById(userId);
-    user?.joinedOrganizations.push(org._id);
+    user?.joinedOrganizations.push(orgId);
     await user?.save();
     return org;
 }

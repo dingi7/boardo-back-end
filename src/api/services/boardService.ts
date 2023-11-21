@@ -2,27 +2,6 @@ import Board from '../../models/boardModel';
 import { Types } from 'mongoose';
 import { getUserById } from './auth';
 
-async function createBoard(name: string, owner: string) {
-    const board = new Board({
-        name,
-        owner
-    });
-    await board.save();
-    return board;
-}
-
-// async function getBoardsByOwnerId(userId: string) {
-//     try {
-//         const boards = await Board.find({ owner: userId });
-//         if (!boards || boards.length === 0) {
-//             throw new Error('No boards were found for the given owner');
-//         }
-//         return boards;
-//     } catch (err: any) {
-//         throw new Error('In-valid user id');
-//     }
-// }
-
 async function getBoardsByOrgId(orgId: string) {
     try {
         const boards = await Board.find({ owner: orgId });
@@ -35,58 +14,19 @@ async function getBoardsByOrgId(orgId: string) {
     }
 }
 
-// async function getBoardsByMemberId(userId: string) {
-//     try {
-//         const boards = await Board.find({ members: userId });
-//         if (!boards) {
-//             throw new Error('No boards were found for the given owner');
-//         }
-//         return boards;
-//     } catch (err: any) {
-//         throw new Error('Invalid user id');
-//     }
-// }
+async function createBoard(name: string, owner: string) {
+    const board = new Board({
+        name,
+        owner,
+    });
+    await board.save();
+    return board;
+}
 
-// async function getBoardByIdAndOwner(boardId: string, ownerId: string) {
-//     const board = await Board.findById(boardId);
-//     if (!board) {
-//         throw new Error('No boards were found for the given owner');
-//     }
-//     if (board.owner.toString() !== ownerId) {
-//         throw new Error('Unauthorized access to board');
-//     }
-//     return board;
-// }
-
-// async function addMemberToBoard(
-//     boardId: string,
-//     userId: string,
-//     ownerId: string
-// ) {
-//     const board = await getBoardByIdAndOwner(boardId, ownerId);
-//     const userObjectId = new Types.ObjectId(userId);
-//     if (board.members.includes(userObjectId)) {
-//         throw new Error('User is already a member');
-//     }
-//     board.members.push(userObjectId);
-//     await board.save();
-//     return board;
-// }
-
-// async function removeMemberFromBoard(
-//     boardId: string,
-//     userId: string,
-//     ownerId: string
-// ) {
-//     const board = await getBoardByIdAndOwner(boardId, ownerId);
-//     const userObjectId = new Types.ObjectId(userId);
-//     if (!board.members.includes(userObjectId)) {
-//         throw new Error("User isn't a member");
-//     }
-//     board.members.pull(userObjectId);
-//     await board.save();
-//     return board;
-// }
+async function getBoardById(boardId: string, meberId: string) {
+    const board = await getBoardIfAuthorized(boardId, meberId);
+    return board;
+}
 
 async function editBoard(boardId: string, name: string, ownerId: string) {
     const board = await getBoardIfAuthorized(boardId, ownerId);
@@ -99,19 +39,6 @@ async function deleteBoard(boardId: string, ownerId: string) {
     const board = await getBoardIfAuthorized(boardId, ownerId);
     await board.deleteOne();
     return { message: 'Board deleted successfully' };
-}
-
-async function getBoardIfAuthorized(boardId: string, memberId: string) {
-    const board = await Board.findById(boardId);
-    if (!board) {
-        throw new Error('Board not found');
-    }
-    const memberObjectId = new Types.ObjectId(memberId);
-    const member = await getUserById(memberId);
-    if (!member?.joinedOrganizations.includes(memberObjectId)) {
-        throw new Error('Unauthorized access to board');
-    }
-    return board;
 }
 
 async function addListToBoard(
@@ -144,15 +71,25 @@ async function removeListFromBoard(
     return board;
 }
 
+async function getBoardIfAuthorized(boardId: string, memberId: string) {
+    const board = await Board.findById(boardId);
+    if (!board) {
+        throw new Error('Board not found');
+    }
+    const memberObjectId = new Types.ObjectId(memberId);
+    const member = await getUserById(memberId);
+    if (!member?.joinedOrganizations.includes(memberObjectId)) {
+        throw new Error('Unauthorized access to board');
+    }
+    return board;
+}
+
 export {
     createBoard,
-    // addMemberToBoard,
-    // removeMemberFromBoard,
-    // getBoardsByMemberId,
-    // getBoardsByOwnerId,
     getBoardsByOrgId,
     editBoard,
     deleteBoard,
     addListToBoard,
     removeListFromBoard,
+    getBoardById,
 };

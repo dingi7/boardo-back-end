@@ -4,6 +4,7 @@ import {
     createBoard,
     deleteBoard,
     editBoard,
+    getBoardById,
     getBoardsByOrgId,
 } from '../services/boardService';
 
@@ -34,55 +35,6 @@ boardController.get('/boards/org/:orgId', async (c: Context) => {
     return c.json(result, 200);
 });
 
-// boardController.get('/boards/member/:memberId', async (c: Context) => {
-//     const memberId = c.req.param('memberId');
-//     if (!memberId) {
-//         return c.json(
-//             { error: 'Missing required fields or unauthorized' },
-//             400
-//         );
-//     }
-//     const result = await getBoardsByMemberId(memberId);
-//     return c.json(result, 200);
-// });
-
-// boardController.post('/boards/:boardId/members', async (c: Context) => {
-//     // add error handling for non existing user
-//     const boardId = c.req.param('boardId');
-//     const user = checkAuthorization(c);
-//     const reqBody = await c.req.json();
-//     if (!boardId || !reqBody.userId || !user?._id) {
-//         return c.json(
-//             { error: 'Missing required fields or unauthorized' },
-//             400
-//         );
-//     }
-//     const userId = reqBody['userId'].toString();
-//     const result = await addMemberToBoard(boardId, userId, user?._id);
-//     return c.json(result, 200);
-// });
-
-// boardController.delete(
-//     '/boards/:boardId/members/:memberId',
-//     async (c: Context) => {
-//         // add error handling for not existing user
-//         const { boardId, memberId } = c.req.param();
-//         const user = checkAuthorization(c);
-//         if (!boardId || !memberId || !user?._id) {
-//             return c.json(
-//                 { error: 'Missing required fields or unauthorized' },
-//                 400
-//             );
-//         }
-//         const result = await removeMemberFromBoard(
-//             boardId,
-//             memberId,
-//             user?._id
-//         );
-//         return c.json(result, 200);
-//     }
-// );
-
 boardController
     .put('/boards/:boardId', async (c: Context) => {
         const reqBody = await c.req.json();
@@ -98,7 +50,7 @@ boardController
         const result = await editBoard(boardId, name, user?._id);
         return c.json(result, 200);
     })
-    .delete('/boards/:boardId', async (c: Context) => {
+    .delete(async (c: Context) => {
         const boardId = c.req.param('boardId');
         const user = checkAuthorization(c);
         if (!boardId || !user?._id) {
@@ -109,6 +61,18 @@ boardController
         }
         const result = await deleteBoard(boardId, user?._id);
         return c.json(result, 200);
+    })
+    .get(async (c: Context) => {
+        const boardId = c.req.param('boardId');
+        const user = checkAuthorization(c);
+        if (!boardId || !user?._id) {
+            return c.json(
+                { error: 'Missing required fields or unauthorized' },
+                400
+            );
+        }
+        const board = await getBoardById(boardId, user?._id);
+        return c.json(board, 200);
     });
 
 export default boardController;
