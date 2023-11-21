@@ -3,5 +3,6 @@ export interface IUser{
     firstName: string;
     username: string;
     email: string;
+    joinedOrganizations: string[];
     hashedPassword: string;
 }

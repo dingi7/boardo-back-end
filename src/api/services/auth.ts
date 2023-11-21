@@ -56,11 +56,12 @@ async function getUserById(id: string) {
     return await User.findById(id);
 }
 
-function createSession(user: IUser): ISession {
+function createSession(user: any): ISession { // fix tipization later
     return {
         _id: user._id,
         username: user.username,
         email: user.email,
+        joinedOrganizations: user.joinedOrganizations,
         accessToken: jsonwebtoken.sign({ _id: user._id }, JWT_SECRET),
     };
 }
@@ -70,11 +71,13 @@ function verifySession(token: string) {
         _id: string;
         username: string;
         email: string;
+        joinedOrganizations: string[];
     };
     const session: ISession = {
         _id: data._id,
         username: data.username,
         email: data.email,
+        joinedOrganizations: data.joinedOrganizations,
         accessToken: token,
     };
     return session;
