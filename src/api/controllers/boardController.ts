@@ -40,19 +40,20 @@ boardController
         const reqBody = await c.req.json();
         const boardId = c.req.param('boardId');
         const user = checkAuthorization(c);
-        if (!boardId || !reqBody.name || !user?._id) {
+        if (!boardId || !reqBody.boardName || !user?._id) {
             return c.json(
                 { error: 'Missing required fields or unauthorized' },
                 400
             );
         }
         const name = reqBody['boardName'].toString();
-        const result = await editBoard(boardId, name, user?._id);
+        const lists = reqBody['lists'];
+        const result = await editBoard(boardId, name, user?._id, lists);
         return c.json(result, 200);
     })
     .delete(async (c: Context) => {
         const boardId = c.req.param('boardId');
-        const user = checkAuthorization(c);
+        const user = checkAuthorization(c);        
         if (!boardId || !user?._id) {
             return c.json(
                 { error: 'Missing required fields or unauthorized' },

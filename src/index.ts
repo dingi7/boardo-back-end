@@ -4,6 +4,8 @@ import { prettyJSON } from 'hono/pretty-json';
 import { logger } from 'hono/logger';
 import mongoose from 'mongoose';
 import { authHeader } from './middlewares';
+import { cors } from 'hono/cors'
+
 import api from './api';
 import dotenv from 'dotenv';
 
@@ -27,6 +29,9 @@ function configureServer() {
     app.use('*', logger());
     app.use(authHeader);
     app.use(prettyJSON());
+
+    // cors
+    app.use(cors());
 
     // Routes
     app.get('/', (c) => c.text('Hello Hono!'));

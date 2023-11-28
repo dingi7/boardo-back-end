@@ -28,9 +28,28 @@ async function getBoardById(boardId: string, meberId: string) {
     return board;
 }
 
-async function editBoard(boardId: string, name: string, ownerId: string) {
+async function editBoard(
+    boardId: string,
+    name: string,
+    ownerId: string,
+    lists: any
+) {
     const board = await getBoardIfAuthorized(boardId, ownerId);
-    board.name = name;
+    board.name = name || board.name;
+
+    const listIds = lists.map((list: any) => list._id);
+
+    board.lists.forEach((list: any) => {
+        console.log(list._id);
+
+        const index = listIds.indexOf(list._id.toString());
+        console.log(index);
+
+        if (index > -1) {
+            list.position = index;
+        }
+    });
+
     await board.save();
     return board;
 }
@@ -76,12 +95,11 @@ async function getBoardIfAuthorized(boardId: string, memberId: string) {
     if (!board) {
         throw new Error('Board not found');
     }
-    const memberObjectId = new Types.ObjectId(memberId);
     const member = await getUserById(memberId);
-    if (!member?.joinedOrganizations.includes(memberObjectId)) {
+    if (!member?.joinedOrganizations.includes(board.owner)) {
         throw new Error('Unauthorized access to board');
     }
-    return board;
+    return await board.populate('lists.list'); // populate lists.position
 }
 
 export {

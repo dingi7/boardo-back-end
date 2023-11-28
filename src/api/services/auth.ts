@@ -40,6 +40,7 @@ async function loginUser(userPayload: RegisterPayload) {
     const userByUsername = await User.findOne({
         username: userPayload.username,
     });
+
     const userByEmail = await User.findOne({ email: userPayload.email });
 
     const user = userByUsername || userByEmail;
@@ -56,7 +57,8 @@ async function getUserById(id: string) {
     return await User.findById(id);
 }
 
-function createSession(user: any): ISession { // fix tipization later
+function createSession(user: any): ISession {
+    // fix tipization later
     return {
         _id: user._id,
         username: user.username,
@@ -83,7 +85,7 @@ function verifySession(token: string) {
     return session;
 }
 
-function checkAuthorization(c: AuthContext): ISession | null {
+function checkAuthorization(c: AuthContext): ISession | any {
     if (c.user) {
         return c.user;
     } else {
