@@ -47,8 +47,8 @@ boardController
             );
         }
         const name = reqBody['boardName'].toString();
-        const lists = reqBody['lists'];
-        const result = await editBoard(boardId, name, user?._id, lists);
+        const lists = reqBody['listIds'];
+        const result = await editBoard(boardId, name, user?._id, lists ? lists : undefined);
         return c.json(result, 200);
     })
     .delete(async (c: Context) => {

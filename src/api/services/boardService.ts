@@ -32,23 +32,25 @@ async function editBoard(
     boardId: string,
     name: string,
     ownerId: string,
-    lists: any
+    lists?: any,
+    cards?: any
 ) {
     const board = await getBoardIfAuthorized(boardId, ownerId);
     board.name = name || board.name;
+    console.log(lists);
 
-    const listIds = lists.map((list: any) => list._id);
-
-    board.lists.forEach((list: any) => {
-        console.log(list._id);
-
-        const index = listIds.indexOf(list._id.toString());
-        console.log(index);
-
-        if (index > -1) {
-            list.position = index;
-        }
-    });
+    if (lists) {
+        // Create a Map for quick lookups
+        const listPositions = new Map(
+            lists.map((list: any, index: number) => [list, index])
+        );
+        board.lists.forEach((list: any) => {
+            const position = listPositions.get(list.list._id.toString());
+            if (position !== undefined) {
+                list.position = position;
+            }
+        });
+    }
 
     await board.save();
     return board;
