@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import List from '../../models/listModel';
 import { getBoardById } from './boardService';
 
@@ -7,6 +8,7 @@ async function getListById(listId: string) {
         if (!list) {
             throw new Error('No list found for the given id');
         }
+        await list.populate('cards');
         return list;
     } catch (err: any) {
         throw new Error('Invalid list id');
@@ -21,9 +23,16 @@ async function createList(name: string, boardId: string, _id: string) {
         cards: [],
     });
     await list.save();
-    board.lists.push({list: list._id, position: board.lists.length});
+    board.lists.push(list._id);
     await board.save();
     return list;
 }
 
-export { getListById, createList };
+async function addCardToList(listId: string, cardId: string) {
+    const list = await getListById(listId);
+    list.cards.push(new mongoose.Types.ObjectId(cardId));
+    await list.save();
+    return list;
+}
+
+export { getListById, createList, addCardToList };

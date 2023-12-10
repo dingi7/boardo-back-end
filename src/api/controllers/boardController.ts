@@ -48,7 +48,8 @@ boardController
         }
         const name = reqBody['boardName'].toString();
         const lists = reqBody['listIds'];
-        const result = await editBoard(boardId, name, user?._id, lists ? lists : undefined);
+        const cards = reqBody['cardIds'];
+        const result = await editBoard(boardId, name, user?._id, lists ? lists : undefined, cards ? cards : undefined);
         return c.json(result, 200);
     })
     .delete(async (c: Context) => {

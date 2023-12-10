@@ -1,6 +1,7 @@
 import Board from '../../models/boardModel';
 import { Types } from 'mongoose';
 import { getUserById } from './auth';
+import { IBoard } from '../../interfaces/BoardInterface';
 
 async function getBoardsByOrgId(orgId: string) {
     try {
@@ -35,21 +36,41 @@ async function editBoard(
     lists?: any,
     cards?: any
 ) {
-    const board = await getBoardIfAuthorized(boardId, ownerId);
+
+    const board = await getBoardIfAuthorized(boardId, ownerId) as unknown as IBoard;
     board.name = name || board.name;
-    console.log(lists);
 
     if (lists) {
-        // Create a Map for quick lookups
-        const listPositions = new Map(
-            lists.map((list: any, index: number) => [list, index])
+        // Map list IDs to list objects
+        const listMap = new Map(
+            board.lists.map((list) => [list._id.toString(), list])
         );
-        board.lists.forEach((list: any) => {
-            const position = listPositions.get(list.list._id.toString());
-            if (position !== undefined) {
-                list.position = position;
+
+        // Reorder board.lists
+        board.lists = lists.map((listId: string) => {
+            const list = listMap.get(listId);
+            if (!list) {
+                throw new Error(`List with ID ${listId} not found`);
             }
+            return list;
         });
+    }
+
+    if (cards) {
+        console.log(cards);
+        if (cards.length !== board.lists.length) {
+            throw new Error(
+                'The length of the cards array must match the number of lists'
+            );
+        }
+
+        // Reorder cards in each list
+        for (let i = 0; i < board.lists.length; i++) {
+            const list = board.lists[i];
+            const cardIds = cards[i];
+            list.cards = cardIds;
+            await list.save();
+        }
     }
 
     await board.save();
@@ -101,7 +122,7 @@ async function getBoardIfAuthorized(boardId: string, memberId: string) {
     if (!member?.joinedOrganizations.includes(board.owner)) {
         throw new Error('Unauthorized access to board');
     }
-    return await board.populate('lists.list'); // populate lists.position
+    return (await board.populate('lists')).populate('lists.cards'); // populate lists.position
 }
 
 export {
