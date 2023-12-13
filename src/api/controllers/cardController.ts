@@ -28,7 +28,7 @@ cardController.delete('/cards/:cardId', async (c: Context) => {
     const reqBody = await c.req.json();
     const cardId = c.req.param('cardId');
     const user = checkAuthorization(c);
-    if (!cardId || !user?._id || reqBody.boardId) {
+    if (!cardId || !user?._id || !reqBody.boardId) {
         return c.json(
             { error: 'Missing required fields or unauthorized' },
             400

@@ -15,9 +15,10 @@ async function getBoardsByOrgId(orgId: string) {
     }
 }
 
-async function createBoard(name: string, owner: string) {
+async function createBoard(name: string, backgroundUrl: string, owner: string) {
     const board = new Board({
         name,
+        backgroundUrl,
         owner,
     });
     await board.save();

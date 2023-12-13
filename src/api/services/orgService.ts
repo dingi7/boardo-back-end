@@ -34,4 +34,12 @@ async function joinOrg(orgId: string, orgPassword: string, userId: string) {
     return org;
 }
 
-export { createOrg, joinOrg };
+async function getOrgById(orgId: string) {
+    const org = await Org.findById(orgId);
+    if (!org) {
+        throw new Error('Organization not found');
+    }
+    return org;
+}
+
+export { createOrg, joinOrg, getOrgById };

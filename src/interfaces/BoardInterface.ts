@@ -4,6 +4,7 @@ export interface IBoard extends Document {
     name: string;
     owner: string;
     lists: IList[];
+    backgroundUrl?: string;
 }
 
 interface IList extends Document {
