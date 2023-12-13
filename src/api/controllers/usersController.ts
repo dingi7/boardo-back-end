@@ -1,7 +1,7 @@
 import { registerUser, loginUser, checkAuthorization } from '../services/auth';
 import { Context, Hono } from 'hono';
 import { RegisterPayload } from '../../interfaces/RegisterPayload';
-import { createOrg, joinOrg } from '../services/orgService';
+import { createOrg, getOrgsByMemberId, joinOrg } from '../services/orgService';
 
 const router = new Hono();
 
@@ -59,6 +59,13 @@ router.post('/createOrg', async (c: Context) => {
         );
     }
     const result = await createOrg(reqBody.name, reqBody.password, user._id);
+    return c.json(result, 200);
+});
+
+
+router.get('/orgs', async (c: Context) => {
+    const user = checkAuthorization(c);
+    const result = await getOrgsByMemberId(user._id);
     return c.json(result, 200);
 });
 

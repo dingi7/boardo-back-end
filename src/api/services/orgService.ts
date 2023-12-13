@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import Org from '../../models/organization';
 import { getUserById } from './auth';
 
@@ -23,7 +24,7 @@ async function joinOrg(orgId: string, orgPassword: string, userId: string) {
     if (org.password !== orgPassword) {
         throw new Error('Wrong password');
     }
-    if(org.members.includes(userId as any)) {
+    if (org.members.includes(userId as any)) {
         throw new Error('User already in the organization');
     }
     org.members.push(userId);
@@ -35,11 +36,30 @@ async function joinOrg(orgId: string, orgPassword: string, userId: string) {
 }
 
 async function getOrgById(orgId: string) {
-    const org = await Org.findById(orgId);
-    if (!org) {
-        throw new Error('Organization not found');
+    try {
+        const org = await Org.findById(new Types.ObjectId(orgId));
+        if (!org) {
+            throw new Error('Organization not found');
+        }
+        return org;
+    } catch (err: any) {
+        console.log(err);
+        if (
+            err.message ===
+            'input must be a 24 character hex string, 12 byte Uint8Array, or an integer'
+        ) {
+            throw new Error('Organization not found');
+        }
+        throw err;
     }
-    return org;
 }
 
-export { createOrg, joinOrg, getOrgById };
+async function getOrgsByMemberId(memberId: string) {
+    const orgs = await Org.find({ members: memberId });
+    if (!orgs) {
+        throw new Error('Organization not found');
+    }
+    return orgs;
+}
+
+export { createOrg, joinOrg, getOrgById, getOrgsByMemberId };

@@ -40,9 +40,9 @@ async function registerUser(userPayload: RegisterPayload) {
 async function loginUser(userPayload: RegisterPayload) {
     const userByUsername = await User.findOne<IUser>({
         username: userPayload.username,
-    });
+    }).populate('joinedOrganizations');
 
-    const userByEmail = await User.findOne<IUser>({ email: userPayload.email });
+    const userByEmail = await User.findOne<IUser>({ email: userPayload.email }).populate('joinedOrganizations');
 
     const user = userByUsername || userByEmail;
 
