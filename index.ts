@@ -12,7 +12,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 async function connectToDatabase() {
-    const databaseUrl: string = process.env.DATABASE_URL || 'mongodb://127.0.0.1:27017/boardo';
+    const databaseUrl: string = process.env.MONGODB_URI || 'mongodb+srv://vercel-admin-user-657c114b46a12b1baa10a0c4:YmoC0dlSBhlGxtAW@boardocluster.ysfd69e.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
     try {
         await mongoose.connect(databaseUrl);
         console.log('Connected to the database');
