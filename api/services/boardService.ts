@@ -84,21 +84,6 @@ async function deleteBoard(boardId: string, ownerId: string) {
     return { message: 'Board deleted successfully' };
 }
 
-async function addListToBoard(
-    boardId: string,
-    listId: string,
-    memberId: string
-) {
-    const board = await getBoardIfAuthorized(boardId, memberId);
-    const listObjectId = new Types.ObjectId(listId);
-    if (board.lists.includes(listObjectId)) {
-        throw new Error('List already present on the board');
-    }
-    board.lists.push(listObjectId);
-    await board.save();
-    return board;
-}
-
 async function removeListFromBoard(
     boardId: string,
     listId: string,
@@ -131,7 +116,6 @@ export {
     getBoardsByOrgId,
     editBoard,
     deleteBoard,
-    addListToBoard,
     removeListFromBoard,
     getBoardById,
 };

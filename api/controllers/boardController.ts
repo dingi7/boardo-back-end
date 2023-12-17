@@ -89,21 +89,5 @@ boardController
         const board = await getBoardById(boardId, user?._id);
         return c.json(board, 200);
     })
-    .post(async (c: Context) => {
-        const reqBody = await c.req.json();
-        const boardId = c.req.param('boardId');
-        const user = checkAuthorization(c);
-        if (!boardId || !user?._id) {
-            return c.json(
-                { error: 'Missing required fields or unauthorized' },
-                400
-            );
-        }
-        const backgroundUrl = reqBody['backgroundUrl'];
-        const board = await getBoardById(boardId, user?._id);
-        board.backgroundUrl = backgroundUrl;
-        await board.save();
-        return c.json(board, 200);
-    });
 
 export default boardController;

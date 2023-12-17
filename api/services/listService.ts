@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import List from '../../models/listModel';
-import { getBoardById } from './boardService';
+import { getBoardById, removeListFromBoard } from './boardService';
 
 async function getListById(listId: string) {
     try {
@@ -28,6 +28,17 @@ async function createList(name: string, boardId: string, _id: string) {
     return list;
 }
 
+async function deleteList(listId: string, userId: string) {
+    const list = await getListById(listId);
+    await removeListFromBoard(
+        list.board._id.toString(),
+        listId,
+        userId
+    );
+    await list.deleteOne();
+    return list;
+}
+
 async function addCardToList(listId: string, cardId: string) {
     const list = await getListById(listId);
     list.cards.push(new mongoose.Types.ObjectId(cardId));
@@ -35,4 +46,4 @@ async function addCardToList(listId: string, cardId: string) {
     return list;
 }
 
-export { getListById, createList, addCardToList };
+export { getListById, createList, addCardToList, deleteList };
