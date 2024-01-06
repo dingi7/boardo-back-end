@@ -53,7 +53,8 @@ boardController
                 400
             );
         }
-        const name = reqBody['boardName'].toString();
+        
+        const name = reqBody['boardName'] ? reqBody['boardName'].toString() : undefined;
         const lists = reqBody['listIds'];
         const cards = reqBody['cardIds'];
         const backgroundUrl = reqBody['backgroundUrl'];
