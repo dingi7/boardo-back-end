@@ -60,8 +60,8 @@ boardController
         const backgroundUrl = reqBody['backgroundUrl'];
         const result = await editBoard(
             boardId,
+            user._id,
             name? name : undefined,
-            user?._id,
             lists ? lists : undefined,
             cards ? cards : undefined,
             backgroundUrl ? backgroundUrl : undefined
