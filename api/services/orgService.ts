@@ -62,4 +62,12 @@ async function getOrgsByMemberId(memberId: string) {
     return orgs;
 }
 
-export { createOrg, joinOrg, getOrgById, getOrgsByMemberId };
+async function getAllOrgs() {
+    const orgs = await Org.find({}).select('-owner -members -password').exec();
+    if (!orgs) {
+        throw new Error('No organizations were found');
+    }
+    return orgs;
+}
+
+export { createOrg, joinOrg, getOrgById, getOrgsByMemberId, getAllOrgs };

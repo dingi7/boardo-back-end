@@ -1,7 +1,7 @@
 import { registerUser, loginUser, checkAuthorization } from '../services/auth';
 import { Context, Hono } from 'hono';
 import { RegisterPayload } from '../../interfaces/RegisterPayload';
-import { createOrg, getOrgsByMemberId, joinOrg } from '../services/orgService';
+import { createOrg, getAllOrgs, getOrgsByMemberId, joinOrg } from '../services/orgService';
 
 const router = new Hono();
 
@@ -49,18 +49,10 @@ router.post('/joinOrg/:id', async (c: Context) => {
     return c.json(result, 200);
 });
 
-// router.post('/createOrg', async (c: Context) => {
-//     const reqBody = await c.req.json<OrgPayload>();
-//     const user = checkAuthorization(c);
-//     if (!reqBody?.password || !reqBody?.name || !user?._id) {
-//         return c.json(
-//             { error: 'Missing required fields or unauthorized' },
-//             400
-//         );
-//     }
-//     const result = await createOrg(reqBody.name, reqBody.password, user._id);
-//     return c.json(result, 200);
-// });
+router.get('/allOrgs', async (c: Context) => {
+    const result = await getAllOrgs();
+    return c.json(result, 200);
+});
 
 router
     .get('/orgs', async (c: Context) => {
