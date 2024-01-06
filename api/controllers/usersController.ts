@@ -7,7 +7,7 @@ const router = new Hono();
 
 interface OrgPayload {
     [key: string]: any; // Adding index signature
-    name?: string;
+    name: string;
     password: string;
     // other properties...
 }
@@ -49,24 +49,40 @@ router.post('/joinOrg/:id', async (c: Context) => {
     return c.json(result, 200);
 });
 
-router.post('/createOrg', async (c: Context) => {
-    const reqBody = await c.req.json<OrgPayload>();
-    const user = checkAuthorization(c);
-    if (!reqBody?.password || !reqBody?.name || !user?._id) {
-        return c.json(
-            { error: 'Missing required fields or unauthorized' },
-            400
+// router.post('/createOrg', async (c: Context) => {
+//     const reqBody = await c.req.json<OrgPayload>();
+//     const user = checkAuthorization(c);
+//     if (!reqBody?.password || !reqBody?.name || !user?._id) {
+//         return c.json(
+//             { error: 'Missing required fields or unauthorized' },
+//             400
+//         );
+//     }
+//     const result = await createOrg(reqBody.name, reqBody.password, user._id);
+//     return c.json(result, 200);
+// });
+
+router
+    .get('/orgs', async (c: Context) => {
+        const user = checkAuthorization(c);
+        const result = await getOrgsByMemberId(user._id);
+        return c.json(result, 200);
+    })
+    .post(async (c: Context) => {
+        const reqBody = await c.req.json<OrgPayload>();
+        const user = checkAuthorization(c);
+        if (!reqBody?.password || !reqBody?.name || !user?._id) {
+            return c.json(
+                { error: 'Missing required fields or unauthorized' },
+                400
+            );
+        }
+        const result = await createOrg(
+            reqBody.name,
+            reqBody.password,
+            user._id
         );
-    }
-    const result = await createOrg(reqBody.name, reqBody.password, user._id);
-    return c.json(result, 200);
-});
-
-
-router.get('/orgs', async (c: Context) => {
-    const user = checkAuthorization(c);
-    const result = await getOrgsByMemberId(user._id);
-    return c.json(result, 200);
-});
+        return c.json(result, 200);
+    });
 
 export default router;
