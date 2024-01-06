@@ -47,7 +47,7 @@ boardController
         const reqBody = await c.req.json();
         const boardId = c.req.param('boardId');
         const user = checkAuthorization(c);
-        if (!boardId || !reqBody.boardName || !user?._id) {
+        if (!boardId || !user?._id) {
             return c.json(
                 { error: 'Missing required fields or unauthorized' },
                 400
@@ -56,12 +56,14 @@ boardController
         const name = reqBody['boardName'].toString();
         const lists = reqBody['listIds'];
         const cards = reqBody['cardIds'];
+        const backgroundUrl = reqBody['backgroundUrl'];
         const result = await editBoard(
             boardId,
-            name,
+            name? name : undefined,
             user?._id,
             lists ? lists : undefined,
-            cards ? cards : undefined
+            cards ? cards : undefined,
+            backgroundUrl ? backgroundUrl : undefined
         );
         return c.json(result, 200);
     })

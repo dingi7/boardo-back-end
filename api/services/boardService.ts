@@ -32,14 +32,16 @@ async function getBoardById(boardId: string, meberId: string) {
 
 async function editBoard(
     boardId: string,
-    name: string,
     ownerId: string,
+    name?: string,
     lists?: any,
-    cards?: any
+    cards?: any,
+    backgroundUrl?: string,
 ) {
 
     const board = await getBoardIfAuthorized(boardId, ownerId) as unknown as IBoard;
     board.name = name || board.name;
+    board.backgroundUrl = backgroundUrl || board.backgroundUrl;
 
     if (lists) {
         // Map list IDs to list objects
