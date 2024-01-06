@@ -11,7 +11,7 @@ async function getBoardsByOrgId(orgId: string) {
         }
         return boards;
     } catch (err: any) {
-        throw new Error('Invalid org id');
+        return null;
     }
 }
 
