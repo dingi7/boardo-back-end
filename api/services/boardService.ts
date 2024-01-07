@@ -2,6 +2,7 @@ import Board from '../../models/boardModel';
 import { Types } from 'mongoose';
 import { getUserById } from './auth';
 import { IBoard } from '../../interfaces/BoardInterface';
+import { getOrgById } from './orgService';
 
 async function getBoardsByOrgId(orgId: string) {
     try {
@@ -16,6 +17,10 @@ async function getBoardsByOrgId(orgId: string) {
 }
 
 async function createBoard(name: string, backgroundUrl: string, owner: string) {
+    const existingBoards = await getBoardsByOrgId(owner);
+    if(!existingBoards || existingBoards.length >= 5) {
+        throw new Error('You have reached the maximum number of boards for your organization');
+    }
     const board = new Board({
         name,
         backgroundUrl,
