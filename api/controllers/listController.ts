@@ -1,5 +1,10 @@
 import { Context, Hono } from 'hono';
-import { createList, deleteList, editList, getListById } from '../services/listService';
+import {
+    createList,
+    deleteList,
+    editList,
+    getListById,
+} from '../services/listService';
 import { checkAuthorization } from '../services/auth';
 
 const listController = new Hono();
@@ -29,13 +34,15 @@ listController
             );
         }
         await deleteList(listId, user._id);
-        return c.json({message: "List removed successfully!"}, 200);
+        return c.json({ message: 'List removed successfully!' }, 200);
     })
     .put(async (c: Context) => {
+        const reqBody = await c.req.json();
         const user = checkAuthorization(c);
         const listId = c.req.param('listId');
-        const name = c.req.param('name');
-        const organizationId = c.req.param('organizationId');
+        const name = reqBody['name'];
+        const organizationId = reqBody['organizationId'];
+
         if (!listId || !user?._id || !name) {
             return c.json(
                 { error: 'Missing required fields or unauthorized' },
