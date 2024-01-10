@@ -1,4 +1,5 @@
 import Card from "../../models/cardModel";
+import { writeActivity } from "../../util/ActivityWriter";
 import { addCardToList } from "./listService";
 
 export async function getCardById(cardId: string) {
@@ -13,18 +14,28 @@ export async function getCardById(cardId: string) {
     }
 }
 
-export async function createCard(name: string, listId: string) {
+export async function createCard(name: string, listId: string, userId: string, organizationId: string) {
     const card = new Card({
         name,
         list: listId,
     });
     await addCardToList(listId, card._id);
     await card.save();
+    writeActivity({
+        user: userId,
+        organization: organizationId,
+        action: 'Created card ' + name + ' on list ' + listId,
+    });
     return card;
 }
 
-export async function deleteCardById(cardId: string, ownerId: string) {
+export async function deleteCardById(cardId: string, userId: string, organizationId: string) {
     const card = await getCardById(cardId);
     await card.deleteOne();
+    writeActivity({
+        user: userId,
+        organization: organizationId,
+        action: 'Deleted card ' + card.name,
+    });
     return { message: 'Card deleted successfully' };
 }

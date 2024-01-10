@@ -70,4 +70,11 @@ async function getAllOrgs() {
     return orgs;
 }
 
-export { createOrg, joinOrg, getOrgById, getOrgsByMemberId, getAllOrgs };
+async function addActivityToOrg(orgId: string, activityId: string) {
+    const org = await getOrgById(orgId);
+    org.activity.push(activityId);
+    await org.save();
+    return org;
+}
+
+export { createOrg, joinOrg, getOrgById, getOrgsByMemberId, getAllOrgs, addActivityToOrg };

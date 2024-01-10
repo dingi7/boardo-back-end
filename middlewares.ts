@@ -21,10 +21,4 @@ export async function authHeader(c: AuthContext, next: Next) {
     }
 }
 
-export const errorHandler = async (c: Context, next: Function) => {
-    try {
-        await next();
-    } catch (err: any) {
-        return c.json({ error: err.message }, 400);
-    }
-};
+

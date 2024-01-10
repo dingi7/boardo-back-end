@@ -35,7 +35,6 @@ listController
 listController.post('/list', async (c: Context) => {
     const { name, boardId } = await c.req.json<listPayload>();
     const { _id } = checkAuthorization(c);
-    console.log(_id);
 
     if (!name || !boardId) {
         return c.json({ error: 'Missing required fields' }, 400);

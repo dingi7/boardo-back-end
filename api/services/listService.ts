@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import List from '../../models/listModel';
 import { getBoardById, removeListFromBoard } from './boardService';
+import { writeActivity } from '../../util/ActivityWriter';
 
 async function getListById(listId: string) {
     try {
@@ -25,6 +26,13 @@ async function createList(name: string, boardId: string, _id: string) {
     await list.save();
     board.lists.push(list._id);
     await board.save();
+
+    writeActivity({
+        user: _id,
+        organization: board.owner._id,
+        board: board._id,
+        action: 'Created list ' + name + " on board " + board.name,
+    });
     return list;
 }
 

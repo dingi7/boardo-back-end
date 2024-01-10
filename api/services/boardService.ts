@@ -3,6 +3,7 @@ import { Types } from 'mongoose';
 import { getUserById } from './auth';
 import { IBoard } from '../../interfaces/BoardInterface';
 import { getOrgById } from './orgService';
+import { writeActivity } from '../../util/ActivityWriter';
 
 async function getBoardsByOrgId(orgId: string) {
     try {
@@ -16,10 +17,17 @@ async function getBoardsByOrgId(orgId: string) {
     }
 }
 
-async function createBoard(name: string, backgroundUrl: string, owner: string) {
+async function createBoard(
+    name: string,
+    backgroundUrl: string,
+    owner: string,
+    userId: string
+) {
     const existingBoards = await getBoardsByOrgId(owner);
-    if(!existingBoards || existingBoards.length >= 5) {
-        throw new Error('You have reached the maximum number of boards for your organization');
+    if (!existingBoards || existingBoards.length >= 5) {
+        throw new Error(
+            'You have reached the maximum number of boards for your organization'
+        );
     }
     const board = new Board({
         name,
@@ -27,6 +35,12 @@ async function createBoard(name: string, backgroundUrl: string, owner: string) {
         owner,
     });
     await board.save();
+    writeActivity({
+        user: userId,
+        organization: owner,
+        board: board._id,
+        action: 'Created a board',
+    });
     return board;
 }
 
@@ -37,16 +51,27 @@ async function getBoardById(boardId: string, meberId: string) {
 
 async function editBoard(
     boardId: string,
-    ownerId: string,
+    userId: string,
     name?: string,
     lists?: any,
     cards?: any,
-    backgroundUrl?: string,
+    backgroundUrl?: string
 ) {
-
-    const board = await getBoardIfAuthorized(boardId, ownerId) as unknown as IBoard;
+    const board = (await getBoardIfAuthorized(
+        boardId,
+        userId
+    )) as unknown as IBoard;
     board.name = name || board.name;
     board.backgroundUrl = backgroundUrl || board.backgroundUrl;
+
+    if (!lists && !cards) {
+        writeActivity({
+            user: userId,
+            organization: board.owner,
+            board: board._id,
+            action: name ? `Renamed the board to ${name}` : backgroundUrl ? 'Changed the background image' : 'Edited the board',
+        });
+    }
 
     if (lists) {
         // Map list IDs to list objects
@@ -85,8 +110,13 @@ async function editBoard(
     return board;
 }
 
-async function deleteBoard(boardId: string, ownerId: string) {
-    const board = await getBoardIfAuthorized(boardId, ownerId);
+async function deleteBoard(boardId: string, userId: string) {
+    const board = await getBoardIfAuthorized(boardId, userId);
+    await writeActivity({
+        user: userId,
+        organization: board.owner,
+        action: 'Deleted board ' + board.name,
+    });
     await board.deleteOne();
     return { message: 'Board deleted successfully' };
 }
@@ -103,6 +133,12 @@ async function removeListFromBoard(
     }
     board.lists.pull(listObjectId);
     await board.save();
+    writeActivity({
+        user: memberId,
+        organization: board.owner,
+        board: board._id,
+        action: 'Removed list ' + listId + ' from board ' + board.name,
+    });
     return board;
 }
 

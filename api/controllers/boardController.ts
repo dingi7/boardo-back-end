@@ -18,13 +18,13 @@ interface BoardPayload {
 
 boardController.post('/boards', async (c: Context) => {
     const reqBody = await c.req.json<BoardPayload>();
-    checkAuthorization(c);
+    const user = checkAuthorization(c);
     if (!reqBody.name || !reqBody.orgId || !reqBody.backgroundUrl) {
         return c.json({ error: 'Missing required fields' }, 400);
     }
     const name = reqBody['name'];
     const backgroundUrl = reqBody['backgroundUrl'] || '';
-    const result = await createBoard(name, backgroundUrl, reqBody.orgId);
+    const result = await createBoard(name, backgroundUrl, reqBody.orgId, user._id);
     return c.json(result, 201);
 });
 
