@@ -31,19 +31,33 @@ async function createList(name: string, boardId: string, _id: string) {
         user: _id,
         organization: board.owner._id,
         board: board._id,
-        action: 'Created list ' + name + " on board " + board.name,
+        action: 'Created list ' + name + ' on board ' + board.name,
     });
     return list;
 }
 
 async function deleteList(listId: string, userId: string) {
     const list = await getListById(listId);
-    await removeListFromBoard(
-        list.board._id.toString(),
-        listId,
-        userId
-    );
+    await removeListFromBoard(list.board._id.toString(), listId, userId);
     await list.deleteOne();
+    return list;
+}
+
+async function editList(
+    listId: string,
+    name: string,
+    userId: string,
+    organizationId: string
+) {
+    const list = await getListById(listId);
+    writeActivity({
+        user: userId,
+        organization: organizationId,
+        board: list.board._id.toString(),
+        action: 'Renamed list ' + list.name + ' to ' + name,
+    });
+    list.name = name;
+    await list.save();
     return list;
 }
 
@@ -54,4 +68,4 @@ async function addCardToList(listId: string, cardId: string) {
     return list;
 }
 
-export { getListById, createList, addCardToList, deleteList };
+export { getListById, createList, addCardToList, deleteList, editList };
