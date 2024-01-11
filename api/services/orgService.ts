@@ -37,7 +37,7 @@ async function joinOrg(orgId: string, orgPassword: string, userId: string) {
 
 async function getOrgById(orgId: string, populate = false) {
     try {
-        const org = await Org.findById(new Types.ObjectId(orgId)).populate('-password');
+        const org = await Org.findById(new Types.ObjectId(orgId));
         if (!org) {
             throw new Error('Organization not found');
         }
