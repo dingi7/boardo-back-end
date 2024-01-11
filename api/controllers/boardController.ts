@@ -29,11 +29,13 @@ boardController.post('/boards', async (c: Context) => {
 });
 
 boardController.get('/boards/org/:orgId', async (c: Context) => {
+    const user = checkAuthorization(c);
     const orgId = c.req.param('orgId');
-    if (!orgId) {
-        return c.json({ error: 'Missing required fields' }, 400);
+    if (!orgId || !user?._id) {
+        return c.json({ error: 'Missing required fields or unauthorized' }, 400);
     }
-    const org = await getOrgById(orgId);
+    const populate = c.req.query('populate') === 'true';
+    const org = await getOrgById(orgId, populate);
     const boards = await getBoardsByOrgId(orgId);
     const response = {
         organization: org,

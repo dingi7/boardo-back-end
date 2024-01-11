@@ -35,11 +35,14 @@ async function joinOrg(orgId: string, orgPassword: string, userId: string) {
     return org;
 }
 
-async function getOrgById(orgId: string) {
+async function getOrgById(orgId: string, populate = false) {
     try {
-        const org = await Org.findById(new Types.ObjectId(orgId));
+        const org = await Org.findById(new Types.ObjectId(orgId)).populate('-password');
         if (!org) {
             throw new Error('Organization not found');
+        }
+        if(populate) {
+            await (await (await org.populate('owner')).populate('activity')).populate('members');
         }
         return org;
     } catch (err: any) {
