@@ -42,7 +42,7 @@ async function getOrgById(orgId: string, populate = false) {
             throw new Error('Organization not found');
         }
         if(populate) {
-            await (await (await org.populate('owner', '-hashedPassword')).populate('activity')).populate('members', '-hashedPassword');
+            await (await (await org.populate('owner', '-hashedPassword -joinedOrganizations')).populate('activity')).populate('members', '-hashedPassword -joinedOrganizations');
         }
         return org;
     } catch (err: any) {
