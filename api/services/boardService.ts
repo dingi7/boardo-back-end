@@ -24,7 +24,7 @@ async function createBoard(
     userId: string
 ) {
     const existingBoards = await getBoardsByOrgId(owner);
-    if (!existingBoards || existingBoards.length >= 5) {
+    if (existingBoards.length >= 5) {
         throw new Error(
             'You have reached the maximum number of boards for your organization'
         );
