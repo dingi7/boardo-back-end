@@ -128,9 +128,9 @@ async function removeListFromBoard(
 ) {
     const board = await getBoardIfAuthorized(boardId, memberId);
     const listObjectId = new Types.ObjectId(listId);
-    if (!board.lists.includes(listObjectId)) {
-        throw new Error('List not found on the board');
-    }
+    // if (!board.lists.includes(listObjectId)) {
+    //     throw new Error('List not found on the board');
+    // }
     board.lists.pull(listObjectId);
     await board.save();
     writeActivity({
