@@ -1,4 +1,4 @@
-import { registerUser, loginUser, checkAuthorization } from '../services/auth';
+import { registerUser, loginUser, checkAuthorization, resetPassword, saveResetToken } from '../services/auth';
 import { Context, Hono } from 'hono';
 import { RegisterPayload } from '../../interfaces/RegisterPayload';
 import { createOrg, getAllOrgs, getOrgsByMemberId, joinOrg } from '../services/orgService';
@@ -10,6 +10,13 @@ interface OrgPayload {
     name: string;
     password: string;
     // other properties...
+}
+
+interface ResetPassword {
+    [key: string]: any; // Adding index signature
+    email: string;
+    newPassword?: string;
+    token?: string;
 }
 
 router.post('/register', async (c: Context) => {
@@ -76,5 +83,24 @@ router
         );
         return c.json(result, 200);
     });
+
+router.post('/resetPasswordRequest', async (c: Context) => {
+    const reqBody = await c.req.json<ResetPassword>();
+    if (!reqBody.email) {
+        return c.json({ error: 'Missing required fields' }, 400);
+    }
+    const result = await saveResetToken(reqBody.email);
+    return c.json({ message: 'Email was sent!' }, 200);
+});
+
+router.post('/resetPassword', async (c: Context) => {
+    const reqBody = await c.req.json<ResetPassword>();
+    if (!reqBody.newPassword || !reqBody.token) {
+        return c.json({ error: 'Missing required fields' }, 400);
+    }
+    const result = await resetPassword(reqBody.token, reqBody.newPassword);
+    return c.json({ message: 'Success' }, 200);
+}
+);
 
 export default router;
