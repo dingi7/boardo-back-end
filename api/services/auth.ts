@@ -7,6 +7,7 @@ import jsonwebtoken from 'jsonwebtoken';
 import { AuthContext } from '../../interfaces/AuthContext';
 import { generateUUID } from '../../util/UUID';
 import PasswordRecovery from '../../models/passwordRecovery';
+import { sendMail } from '../../util/Nodemailer';
 const JWT_SECRET = process.env.JWT_SECRET || 'process.env.JWT_SECRET;';
 
 async function registerUser(userPayload: RegisterPayload) {
@@ -31,7 +32,9 @@ async function loginUser(userPayload: RegisterPayload) {
         username: userPayload.username,
     }).populate('joinedOrganizations');
 
-    const userByEmail = await User.findOne<IUser>({ email: userPayload.email }).populate('joinedOrganizations');
+    const userByEmail = await User.findOne<IUser>({
+        email: userPayload.email,
+    }).populate('joinedOrganizations');
 
     const user = userByUsername || userByEmail;
 
@@ -105,13 +108,29 @@ async function saveResetToken(userEmail: string) {
     if (!user) {
         throw new Error('User not found');
     }
-    const uuid = generateUUID()
+    const uuid = generateUUID();
     const token = new PasswordRecovery({
         user: user._id,
         uuid: uuid,
         expirity: new Date(Date.now() + 3600000), // 1 hour
     });
+
     await token.save();
+    await sendMail(
+        'Password recovery',
+        `<p>Dear ${user.firstName},</p>
+
+        <p>This is an automatic email in response to your request to reset your password. If you did not initiate this request, please ignore this email.</p>
+    
+        <p>To reset your password, click on the following link:</p>
+        <p><a href="https://boardo.vercel.app/auth/resetPassword/${uuid}">Reset Your Password Here</a></p>
+    
+        <p>Please note that this link is valid for a limited time. If you did not request this password reset or have any concerns, please contact our support team immediately at <a href="mailto:info@board.site">info@board.site</a>.</p>
+        <br>
+        <p>Best regards,<br><br>
+        Boardo Team</p>`,
+        userEmail
+    );
     return uuid;
 }
 
@@ -140,5 +159,5 @@ export {
     checkAuthorization,
     getUserByEmail,
     saveResetToken,
-    resetPassword
+    resetPassword,
 };

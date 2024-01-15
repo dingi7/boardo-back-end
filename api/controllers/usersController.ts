@@ -93,7 +93,7 @@ router.post('/resetPasswordRequest', async (c: Context) => {
     return c.json({ message: 'Email was sent!' }, 200);
 });
 
-router.post('/resetPassword', async (c: Context) => {
+router.post('/resetPassword/:uuid', async (c: Context) => {
     const reqBody = await c.req.json<ResetPassword>();
     if (!reqBody.newPassword || !reqBody.token) {
         return c.json({ error: 'Missing required fields' }, 400);
