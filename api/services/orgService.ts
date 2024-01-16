@@ -95,7 +95,7 @@ async function getOrgById(orgId: string, populate = false) {
 }
 
 async function getOrgsByMemberId(memberId: string, populate = false) {
-    const orgs = await Org.find({ members: memberId })
+    const orgs = await Org.find({ members: memberId }).populate('members, -hashedPassword -joinedOrganizations').exec();
     console.log(orgs);
 
     if (!orgs) {
