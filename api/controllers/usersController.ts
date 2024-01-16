@@ -1,7 +1,19 @@
-import { registerUser, loginUser, checkAuthorization, resetPassword, saveResetToken } from '../services/auth';
+import {
+    registerUser,
+    loginUser,
+    checkAuthorization,
+    resetPassword,
+    saveResetToken,
+} from '../services/auth';
 import { Context, Hono } from 'hono';
 import { RegisterPayload } from '../../interfaces/RegisterPayload';
-import { createOrg, getAllOrgs, getOrgsByMemberId, joinOrg } from '../services/orgService';
+import {
+    createOrg,
+    editOrg,
+    getAllOrgs,
+    getOrgsByMemberId,
+    joinOrg,
+} from '../services/orgService';
 
 const router = new Hono();
 
@@ -9,6 +21,7 @@ interface OrgPayload {
     [key: string]: any; // Adding index signature
     name: string;
     password: string;
+    owner?: string;
     // other properties...
 }
 
@@ -84,6 +97,20 @@ router
         return c.json(result, 200);
     });
 
+router.put('/orgs/:id', async (c: Context) => {
+    const orgId = c.req.param('id');
+    const user = checkAuthorization(c);
+    if (!orgId || !user?._id) {
+        return c.json(
+            { error: 'Missing required fields or unauthorized' },
+            400
+        );
+    }
+    const reqBody = await c.req.json<OrgPayload>();
+    const result = await editOrg(orgId, user._id, reqBody.name, reqBody.password, reqBody.owner);
+    return c.json(result, 200);
+});
+
 router.post('/resetPasswordRequest', async (c: Context) => {
     const reqBody = await c.req.json<ResetPassword>();
     if (!reqBody.email) {
@@ -100,7 +127,6 @@ router.post('/resetPassword/:uuid', async (c: Context) => {
     }
     const result = await resetPassword(reqBody.token, reqBody.newPassword);
     return c.json({ message: 'Success' }, 200);
-}
-);
+});
 
 export default router;

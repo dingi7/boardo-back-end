@@ -21,6 +21,29 @@ async function createOrg(name: string, password: string, owner: string) {
     }
 }
 
+async function editOrg(orgId:string, userId: string, name?:string, password?:string, ownerId?:string) {
+    
+    const org = await getOrgById(orgId);
+    if (!org) {
+        throw new Error('Organization not found');
+    }
+    if (!org.owner.equals(userId)) {
+        throw new Error('Unauthorized');
+    }
+    if (name) {
+        org.name = name;
+    }
+    if (password) {
+        org.password = password;
+    }
+    if (ownerId) {
+        org.owner = new Types.ObjectId(ownerId);
+    }
+    await org.save();
+    return org;
+    
+}
+
 async function joinOrg(orgId: string, orgPassword: string, userId: string) {
     const org = await Org.findById(orgId);
     if (!org) {
@@ -103,4 +126,5 @@ export {
     getOrgsByMemberId,
     getAllOrgs,
     addActivityToOrg,
+    editOrg
 };
