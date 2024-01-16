@@ -135,22 +135,42 @@ async function saveResetToken(userEmail: string) {
 }
 
 async function resetPassword(uuid: string, newPassword: string) {
-    const token = await PasswordRecovery.findOne({ uuid: uuid });
-    if (!token) {
-        throw new Error('Invalid token');
+    try {
+        // Find the password recovery token
+        const token : any = await PasswordRecovery.findOne({ uuid });
+
+        if (!token) {
+            throw new Error('Invalid token');
+        }
+
+        // Check if the token has expired
+        if (Number(token.expiry) < Date.now()) {
+            throw new Error('Token expired');
+        }
+
+        // Find the user by the token's user ID
+        const user = await User.findById(token.user);
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        // Hash the new password
+        const newPasswordHash = await hashPassword(newPassword);
+
+        // Update the user's hashedPassword field
+        user.hashedPassword = newPasswordHash;
+
+        // Save the updated user
+        await user.save();
+
+        // Delete the password recovery token
+        await token.deleteOne();
+    } catch (error) {
+        // Handle errors appropriately
+        console.error('Error resetting password:', error.message);
+        throw error;
     }
-    if (Number(token.expirity) < Date.now()) {
-        throw new Error('Token expired');
-    }
-    const user = await User.findById(token.user);
-    if (!user) {
-        throw new Error('User not found');
-    }
-    user.hashedPassword = '';
-    const newPasswordHash = await hashPassword(newPassword);
-    user.hashedPassword = newPasswordHash;
-    await user.save();
-    await token.deleteOne();
 }
 
 export {
