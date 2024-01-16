@@ -146,7 +146,9 @@ async function resetPassword(uuid: string, newPassword: string) {
     if (!user) {
         throw new Error('User not found');
     }
-    user.hashedPassword = await hashPassword(newPassword);
+    user.hashedPassword = '';
+    const newPasswordHash = await hashPassword(newPassword);
+    user.hashedPassword = newPasswordHash;
     await user.save();
     await token.deleteOne();
 }
