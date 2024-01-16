@@ -31,6 +31,7 @@ function configureServer() {
     app.use(prettyJSON());
 
     // cors
+    // app.use(cors());
     app.use(cors());
 
     // Routes
