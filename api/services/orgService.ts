@@ -21,8 +21,13 @@ async function createOrg(name: string, password: string, owner: string) {
     }
 }
 
-async function editOrg(orgId:string, userId: string, name?:string, password?:string, ownerId?:string) {
-    
+async function editOrg(
+    orgId: string,
+    userId: string,
+    name?: string,
+    password?: string,
+    ownerId?: string
+) {
     const org = await getOrgById(orgId);
     if (!org) {
         throw new Error('Organization not found');
@@ -41,7 +46,6 @@ async function editOrg(orgId:string, userId: string, name?:string, password?:str
     }
     await org.save();
     return org;
-    
 }
 
 async function joinOrg(orgId: string, orgPassword: string, userId: string) {
@@ -94,14 +98,43 @@ async function getOrgById(orgId: string, populate = false) {
     }
 }
 
-async function getOrgsByMemberId(memberId: string) {
-    const orgs = await Org.find({ members: memberId }).populate('members -hashedPassword -joinedOrganizations').exec();
-    console.log(orgs);
+async function getOrgsByMemberId(memberId: string, populate = false) {
+    // const orgs = await Org.find({ members: memberId }).populate('members -hashedPassword -joinedOrganizations').exec();
+    // console.log(orgs);
 
-    if (!orgs) {
-        throw new Error('Organization not found');
+    // if (!orgs) {
+    //     throw new Error('Organization not found');
+    // }
+    // return orgs;
+
+    try {
+        let orgsQuery = Org.find({ members: memberId }).select('-password');
+
+        let orgs = await orgsQuery.exec();
+
+        if (!orgs) {
+            throw new Error('Organization not found');
+        }
+        if (populate) {
+            await orgsQuery
+                .populate('owner', '-hashedPassword -joinedOrganizations')
+                .populate('activity')
+                .populate('members', '-hashedPassword -joinedOrganizations');
+
+            // Execute the populated query to get the populated documents
+            orgs = await orgsQuery.exec();
+        }
+        return orgs;
+    } catch (err: any) {
+        console.log(err);
+        if (
+            err.message ===
+            'input must be a 24 character hex string, 12 byte Uint8Array, or an integer'
+        ) {
+            throw new Error('Organization not found');
+        }
+        throw err;
     }
-    return orgs;
 }
 
 async function getAllOrgs() {
@@ -126,5 +159,5 @@ export {
     getOrgsByMemberId,
     getAllOrgs,
     addActivityToOrg,
-    editOrg
+    editOrg,
 };

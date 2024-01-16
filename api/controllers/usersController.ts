@@ -76,8 +76,10 @@ router.get('/allOrgs', async (c: Context) => {
 
 router
     .get('/orgs', async (c: Context) => {
+        const reqBody = await c.req.json();
+
         const user = checkAuthorization(c);
-        const result = await getOrgsByMemberId(user._id);
+        const result = await getOrgsByMemberId(user._id, reqBody.populate);
         return c.json(result, 200);
     })
     .post(async (c: Context) => {
@@ -107,7 +109,13 @@ router.put('/orgs/:id', async (c: Context) => {
         );
     }
     const reqBody = await c.req.json<OrgPayload>();
-    const result = await editOrg(orgId, user._id, reqBody.name, reqBody.password, reqBody.owner);
+    const result = await editOrg(
+        orgId,
+        user._id,
+        reqBody.name,
+        reqBody.password,
+        reqBody.owner
+    );
     return c.json(result, 200);
 });
 
