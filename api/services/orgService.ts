@@ -108,21 +108,16 @@ async function getOrgsByMemberId(memberId: string, populate = false) {
     // return orgs;
 
     try {
-        let orgsQuery = Org.find({ members: memberId }).select('-password');
-
-        let orgs = await orgsQuery.exec();
-
+        const orgs = await Org.find({ members: memberId }).select('-password');
         if (!orgs) {
             throw new Error('Organization not found');
         }
         if (populate) {
-            await orgsQuery
-                .populate('owner', '-hashedPassword -joinedOrganizations')
-                .populate('activity')
-                .populate('members', '-hashedPassword -joinedOrganizations');
+            orgs.forEach(async (org) => {
 
-            // Execute the populated query to get the populated documents
-            orgs = await orgsQuery.exec();
+                await org.populate('owner', '-hashedPassword -joinedOrganizations')
+                await org.populate('activity')
+                await org.populate('members', '-hashedPassword -joinedOrganizations')});
         }
         return orgs;
     } catch (err: any) {
