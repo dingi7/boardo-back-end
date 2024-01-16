@@ -12,7 +12,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 async function connectToDatabase() {
-    const databaseUrl: string = process.env.MONGODB_URI || 'mongodb+srv://vercel-admin-user-657c114b46a12b1baa10a0c4:XRFhhvh0z7Uq53OI@boardocluster.ysfd69e.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
+    const databaseUrl: string = process.env.MONGODB_URI || 'mongodb+srv://vercel-admin-user-65a6cd4b508d533ab52f834c:dSRHUBruefe8nOlB@boardocluster.ysfd69e.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
     try {
         await mongoose.connect(databaseUrl);
         console.log('Connected to the database');
@@ -31,7 +31,6 @@ function configureServer() {
     app.use(prettyJSON());
 
     // cors
-    // app.use(cors());
     app.use(cors());
 
     // Routes
