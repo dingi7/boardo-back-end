@@ -79,7 +79,7 @@ router
         const reqBody = await c.req.json();
 
         const user = checkAuthorization(c);
-        const result = await getOrgsByMemberId(user._id, reqBody.populate);
+        const result = await getOrgsByMemberId(user._id, true);
         return c.json(result, 200);
     })
     .post(async (c: Context) => {
