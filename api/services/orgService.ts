@@ -53,6 +53,19 @@ async function editOrg(orgId:string, userId: string, name?:string, password?:str
     
 }
 
+async function deleteOrg(orgId: string, userId:string) {
+    const org = await getOrgById(orgId);
+    if (!org) {
+        throw new Error('Organization not found');
+    }
+    if (!org.owner.equals(userId)) {
+        throw new Error('Unauthorized');
+    }
+    await org.deleteOne();
+    return { message: 'Organization deleted'};
+    
+}
+
 async function joinOrg(orgId: string, orgPassword: string, userId: string) {
     const org = await Org.findById(orgId);
     if (!org) {
@@ -136,5 +149,6 @@ export {
     getOrgsByMemberId,
     getAllOrgs,
     addActivityToOrg,
-    editOrg
+    editOrg,
+    deleteOrg
 };

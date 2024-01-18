@@ -10,6 +10,7 @@ import { Context, Hono } from 'hono';
 import { RegisterPayload } from '../../interfaces/RegisterPayload';
 import {
     createOrg,
+    deleteOrg,
     editOrg,
     getAllOrgs,
     getOrgsByMemberId,
@@ -100,25 +101,38 @@ router
         return c.json(result, 200);
     });
 
-router.put('/orgs/:id', async (c: Context) => {
-    const orgId = c.req.param('id');
-    const user = checkAuthorization(c);
-    if (!orgId || !user?._id) {
-        return c.json(
-            { error: 'Missing required fields or unauthorized' },
-            400
+router
+    .put('/orgs/:id', async (c: Context) => {
+        const orgId = c.req.param('id');
+        const user = checkAuthorization(c);
+        if (!orgId || !user?._id) {
+            return c.json(
+                { error: 'Missing required fields or unauthorized' },
+                400
+            );
+        }
+        const reqBody = await c.req.json<OrgPayload>();
+        const result = await editOrg(
+            orgId,
+            user._id,
+            reqBody.name,
+            reqBody.password,
+            reqBody.owner
         );
-    }
-    const reqBody = await c.req.json<OrgPayload>();
-    const result = await editOrg(
-        orgId,
-        user._id,
-        reqBody.name,
-        reqBody.password,
-        reqBody.owner
-    );
-    return c.json(result, 200);
-});
+        return c.json(result, 200);
+    })
+    .delete(async (c: Context) => {
+        const orgId = c.req.param('id');
+        const user = checkAuthorization(c);
+        if (!orgId || !user?._id) {
+            return c.json(
+                { error: 'Missing required fields or unauthorized' },
+                400
+            );
+        }
+        const result = await deleteOrg(orgId, user._id);
+        return c.json(result, 200);
+    });
 
 router.post('/resetPasswordRequest', async (c: Context) => {
     const reqBody = await c.req.json<ResetPassword>();
