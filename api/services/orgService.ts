@@ -5,21 +5,30 @@ import { getUserById } from './auth';
 async function createOrg(name: string, password: string, owner: string) {
     try {
         const user = await getUserById(owner);
+
+        if (!user) {
+            throw new Error("Owner not found");
+        }
+
         const org = new Org({
             name: name,
             password: password,
-            owner: user?._id,
-            members: [user?._id],
+            owner: user._id,
+            members: [user._id],
         });
+
         await org.save();
-        user?.joinedOrganizations.push(org._id);
-        await user?.save();
+
+        user.joinedOrganizations.push(org._id);
+        await user.save();
+
         return org;
     } catch (err: any) {
-        console.log(err);
-        // throw err;
+        console.error("Error in createOrg:", err.message);
+        throw err;
     }
 }
+
 
 async function editOrg(orgId:string, userId: string, name?:string, password?:string, ownerId?:string) {
     
