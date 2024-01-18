@@ -173,6 +173,17 @@ async function resetPassword(uuid: string, newPassword: string) {
     }
 }
 
+async function tokenValidarot(uuid:string) {
+    const token : any = await PasswordRecovery.findOne({ uuid });
+    if (!token) {
+        throw new Error('Invalid token');
+    }
+    if (Number(token.expiry) < Date.now()) {
+        throw new Error('Token expired');
+    }
+    return token;
+}
+
 export {
     registerUser,
     loginUser,
@@ -182,4 +193,5 @@ export {
     getUserByEmail,
     saveResetToken,
     resetPassword,
+    tokenValidarot
 };

@@ -4,6 +4,7 @@ import {
     checkAuthorization,
     resetPassword,
     saveResetToken,
+    tokenValidarot,
 } from '../services/auth';
 import { Context, Hono } from 'hono';
 import { RegisterPayload } from '../../interfaces/RegisterPayload';
@@ -135,6 +136,12 @@ router.post('/resetPassword/:uuid', async (c: Context) => {
         return c.json({ error: 'Missing required fields' }, 400);
     }
     const result = await resetPassword(uuid, reqBody.newPassword);
+    return c.json({ message: 'Success' }, 200);
+});
+
+router.post('/tokenValidator/:uuid', async (c: Context) => {
+    const uuid = c.req.param('uuid');
+    const result = await tokenValidarot(uuid);
     return c.json({ message: 'Success' }, 200);
 });
 
