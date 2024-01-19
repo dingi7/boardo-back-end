@@ -142,6 +142,20 @@ async function addActivityToOrg(orgId: string, activityId: string) {
     return org;
 }
 
+async function kickMember(ordId:string, memberId:string, userId: string) {
+    const org = await getOrgById(ordId);
+    if (!org) {
+        throw new Error('Organization not found');
+    }
+    if (!org.owner.equals(userId)) {
+        throw new Error('Unauthorized');
+    }
+    org.members.pull(memberId);
+    await org.save();
+    return org;
+}
+
+
 export {
     createOrg,
     joinOrg,
@@ -150,5 +164,6 @@ export {
     getAllOrgs,
     addActivityToOrg,
     editOrg,
-    deleteOrg
+    deleteOrg,
+    kickMember
 };

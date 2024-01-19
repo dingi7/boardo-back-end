@@ -15,6 +15,7 @@ import {
     getAllOrgs,
     getOrgsByMemberId,
     joinOrg,
+    kickMember,
 } from '../services/orgService';
 
 const router = new Hono();
@@ -24,6 +25,7 @@ interface OrgPayload {
     name: string;
     password: string;
     owner?: string;
+    memberId?: string;
     // other properties...
 }
 
@@ -157,6 +159,20 @@ router.post('/tokenValidator/:uuid', async (c: Context) => {
     const uuid = c.req.param('uuid');
     const result = await tokenValidarot(uuid);
     return c.json({ message: 'Success' }, 200);
+});
+
+router.post('/orgs/:id/kickMember', async (c: Context) => {
+    const orgId = c.req.param('id');
+    const user = checkAuthorization(c);
+    const { memberId } = await c.req.json<OrgPayload>();
+    if (!orgId || !user?._id || !memberId) {
+        return c.json(
+            { error: 'Missing required fields or unauthorized' },
+            400
+        );
+    }
+    const result = await kickMember(orgId, memberId , user._id)
+    return c.json(result, 200);
 });
 
 export default router;
