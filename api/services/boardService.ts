@@ -90,7 +90,6 @@ async function editBoard(
     }
 
     if (cards) {
-        console.log(cards);
         if (cards.length !== board.lists.length) {
             throw new Error(
                 'The length of the cards array must match the number of lists'

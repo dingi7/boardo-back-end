@@ -7,7 +7,7 @@ async function createOrg(name: string, password: string, owner: string) {
         const user = await getUserById(owner);
 
         if (!user) {
-            throw new Error("Owner not found");
+            throw new Error('Owner not found');
         }
 
         const org = new Org({
@@ -24,14 +24,18 @@ async function createOrg(name: string, password: string, owner: string) {
 
         return org;
     } catch (err: any) {
-        console.error("Error in createOrg:", err.message);
+        console.error('Error in createOrg:', err.message);
         throw err;
     }
 }
 
-
-async function editOrg(orgId:string, userId: string, name?:string, password?:string, ownerId?:string) {
-    
+async function editOrg(
+    orgId: string,
+    userId: string,
+    name?: string,
+    password?: string,
+    ownerId?: string
+) {
     const org = await getOrgById(orgId);
     if (!org) {
         throw new Error('Organization not found');
@@ -50,10 +54,9 @@ async function editOrg(orgId:string, userId: string, name?:string, password?:str
     }
     await org.save();
     return org;
-    
 }
 
-async function deleteOrg(orgId: string, userId:string) {
+async function deleteOrg(orgId: string, userId: string) {
     const org = await getOrgById(orgId);
     if (!org) {
         throw new Error('Organization not found');
@@ -62,8 +65,7 @@ async function deleteOrg(orgId: string, userId:string) {
         throw new Error('Unauthorized');
     }
     await org.deleteOne();
-    return { message: 'Organization deleted'};
-    
+    return { message: 'Organization deleted' };
 }
 
 async function joinOrg(orgId: string, orgPassword: string, userId: string) {
@@ -105,7 +107,6 @@ async function getOrgById(orgId: string, populate = false) {
         }
         return org;
     } catch (err: any) {
-        console.log(err);
         if (
             err.message ===
             'input must be a 24 character hex string, 12 byte Uint8Array, or an integer'
@@ -117,14 +118,19 @@ async function getOrgById(orgId: string, populate = false) {
 }
 
 async function getOrgsByMemberId(memberId: string, populate = false) {
-    const orgs = await Org.find({ members: memberId }).select('-password').populate('members').select('-hashedPassword -joinedOrganizations').exec();
-    console.log(orgs);
+    const orgs = await Org.find({ members: memberId })
+        .select('-password')
+        .populate({
+            path: 'members',
+            select: '-hashedPassword -joinedOrganizations',
+        })
+        .populate('activity')
+        .exec();
 
     if (!orgs) {
         throw new Error('Organization not found');
     }
     return orgs;
-    
 }
 
 async function getAllOrgs() {
@@ -142,7 +148,7 @@ async function addActivityToOrg(orgId: string, activityId: string) {
     return org;
 }
 
-async function kickMember(ordId:string, memberId:string, userId: string) {
+async function kickMember(ordId: string, memberId: string, userId: string) {
     const org = await getOrgById(ordId);
     if (!org) {
         throw new Error('Organization not found');
@@ -155,7 +161,6 @@ async function kickMember(ordId:string, memberId:string, userId: string) {
     return org;
 }
 
-
 export {
     createOrg,
     joinOrg,
@@ -165,5 +170,5 @@ export {
     addActivityToOrg,
     editOrg,
     deleteOrg,
-    kickMember
+    kickMember,
 };
