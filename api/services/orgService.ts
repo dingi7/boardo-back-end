@@ -125,6 +125,10 @@ async function getOrgsByMemberId(memberId: string, populate = false) {
             select: '-hashedPassword -joinedOrganizations',
         })
         .populate('activity')
+        .populate({
+            path: 'user',
+            select: '-hashedPassword -joinedOrganizations',
+        })
         .exec();
 
     if (!orgs) {
