@@ -1,20 +1,25 @@
-import Card from "../../models/cardModel";
-import { writeActivity } from "../../util/ActivityWriter";
-import { addCardToList } from "./listService";
+import Card from '../../models/cardModel';
+import { writeActivity } from '../../util/ActivityWriter';
+import { addCardToList } from './listService';
 
 export async function getCardById(cardId: string) {
-    try{
+    try {
         const card = await Card.findById(cardId);
-        if(!card){
-            throw new Error("Card not found");
+        if (!card) {
+            throw new Error('Card not found');
         }
         return card;
-    }catch(err: any){
+    } catch (err: any) {
         throw err;
     }
 }
 
-export async function createCard(name: string, listId: string, userId: string, organizationId: string) {
+export async function createCard(
+    name: string,
+    listId: string,
+    userId: string,
+    organizationId: string
+) {
     const card = new Card({
         name,
         list: listId,
@@ -29,7 +34,11 @@ export async function createCard(name: string, listId: string, userId: string, o
     return card;
 }
 
-export async function deleteCardById(cardId: string, userId: string, organizationId: string) {
+export async function deleteCardById(
+    cardId: string,
+    userId: string,
+    organizationId: string
+) {
     const card = await getCardById(cardId);
     await card.deleteOne();
     writeActivity({
@@ -38,4 +47,21 @@ export async function deleteCardById(cardId: string, userId: string, organizatio
         action: 'Deleted card ' + card.name,
     });
     return { message: 'Card deleted successfully' };
+}
+
+export async function editCard(
+    cardId: string,
+    userId: string,
+    organizationId: string,
+    content: string
+) {
+    const card = (await getCardById(cardId)) as any;
+    card.content = content;
+    await card.save();
+    writeActivity({
+        user: userId,
+        organization: organizationId,
+        action: 'Edited card ' + card.name,
+    });
+    return card;
 }
