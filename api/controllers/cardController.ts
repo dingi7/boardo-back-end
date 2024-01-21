@@ -68,14 +68,14 @@ cardController
             !cardId ||
             !user?._id ||
             !reqBody.organizationId ||
-            !reqBody.content
+            !reqBody.name
         ) {
             return c.json(
                 { error: 'Missing required fields or unauthorized' },
                 400
             );
         }
-        const result = await editCard(cardId, user._id, reqBody.organizationId, reqBody.content);
+        const result = await editCard(cardId, user._id, reqBody.organizationId, reqBody.name);
         return c.json(result, 200);
     });
 

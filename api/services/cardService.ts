@@ -53,10 +53,10 @@ export async function editCard(
     cardId: string,
     userId: string,
     organizationId: string,
-    content: string
+    name: string
 ) {
     const card = (await getCardById(cardId)) as any;
-    card.content = content;
+    card.name = name;
     await card.save();
     writeActivity({
         user: userId,
