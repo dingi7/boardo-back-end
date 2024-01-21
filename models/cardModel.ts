@@ -12,7 +12,9 @@ interface ICard extends Document {
 const cardSchema = new Schema<ICard>({
     name: { type: String, required: true },
     list: { type: Types.ObjectId as any, ref: 'List', required: true }, // Explicitly cast Types.ObjectId
-    styles: { type: Schema.Types.Mixed },
+    styles: {
+        priority: { type: String, default: 'Normal' }, // Specify the type and make it required
+    },
     // Add other properties as needed
 });
 
