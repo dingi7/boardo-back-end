@@ -140,7 +140,7 @@ async function getOrgsByMemberId(memberId: string, populate = false) {
 }
 
 async function getAllOrgs() {
-    const orgs = await Org.find({}).select('-owner -members -password').exec();
+    const orgs = await Org.find({}).select('-owner -members -password -activity').exec();
     if (!orgs) {
         throw new Error('No organizations were found');
     }

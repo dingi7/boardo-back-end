@@ -34,8 +34,6 @@ router.get('/allOrgs', async (c: Context) => {
 
 router
     .get('/orgs', async (c: Context) => {
-        // const reqBody = await c.req.json();
-
         const user = checkAuthorization(c);
         const result = await getOrgsByMemberId(user._id);
         return c.json(result, 200);
