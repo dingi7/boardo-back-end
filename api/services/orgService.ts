@@ -56,12 +56,12 @@ async function editOrg(
     return org;
 }
 
-async function deleteOrg(orgId: string, userId: string) {
+async function deleteOrg(orgId: string, userId: string, orgPassword: string) {
     const org = await getOrgById(orgId);
     if (!org) {
         throw new Error('Organization not found');
     }
-    if (!org.owner.equals(userId)) {
+    if (!org.owner.equals(userId) || org.password !== orgPassword) {
         throw new Error('Unauthorized');
     }
     await org.deleteOne();

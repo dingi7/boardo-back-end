@@ -78,13 +78,14 @@ router
     .delete(async (c: Context) => {
         const orgId = c.req.param('id');
         const user = checkAuthorization(c);
-        if (!orgId || !user?._id) {
+        const reqBody = await c.req.json<OrgPayload>();
+        if (!orgId || !user?._id || !reqBody.password) {
             return c.json(
                 { error: 'Missing required fields or unauthorized' },
                 400
             );
         }
-        const result = await deleteOrg(orgId, user._id);
+        const result = await deleteOrg(orgId, user._id, reqBody.password);
         return c.json(result, 200);
     });
 
