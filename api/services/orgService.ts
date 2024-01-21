@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import Org from '../../models/organization';
+import Org from '../../models/organizationModel';
 import { getUserById } from './auth';
 
 async function createOrg(name: string, password: string, owner: string) {
@@ -57,7 +57,11 @@ async function editOrg(
 }
 
 async function deleteOrg(orgId: string, userId: string, orgPassword: string) {
-    const org = await getOrgById(orgId);
+    const org = await getOrgById(orgId, false, true);
+    console.log(org.owner, userId, org.owner.equals(userId));
+    console.log(org.password, orgPassword);
+    
+    
     if (!org) {
         throw new Error('Organization not found');
     }
@@ -87,11 +91,19 @@ async function joinOrg(orgId: string, orgPassword: string, userId: string) {
     return org;
 }
 
-async function getOrgById(orgId: string, populate = false) {
+async function getOrgById(orgId: string, populate = false, password = false) {
     try {
+        if (password) {
+            const org = await Org.findById(orgId);
+            if (!org) {
+                throw new Error('Organization not found');
+            }
+            return org;
+        }
         const org = await Org.findById(new Types.ObjectId(orgId)).select(
             '-password'
         );
+        
         if (!org) {
             throw new Error('Organization not found');
         }
