@@ -11,6 +11,7 @@ interface CardPayload {
     listId: string;
     organizationId?: string;
     boardId?: string;
+    priority?: string;
 }
 
 cardController.post('/cards', async (c: Context) => {
@@ -64,18 +65,19 @@ cardController
         const reqBody = await c.req.json<CardPayload>();
         const cardId = c.req.param('cardId');
         const user = checkAuthorization(c);
-        if (
-            !cardId ||
-            !user?._id ||
-            !reqBody.organizationId ||
-            !reqBody.name
-        ) {
+        if (!cardId || !user?._id || !reqBody.organizationId) {
             return c.json(
                 { error: 'Missing required fields or unauthorized' },
                 400
             );
         }
-        const result = await editCard(cardId, user._id, reqBody.organizationId, reqBody.name);
+        const result = await editCard(
+            cardId,
+            user._id,
+            reqBody.organizationId,
+            reqBody?.name,
+            reqBody?.priority
+        );
         return c.json(result, 200);
     });
 
