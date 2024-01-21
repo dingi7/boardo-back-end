@@ -1,13 +1,10 @@
-import { IUser } from './../../interfaces/User';
 import bcrypt from 'bcrypt';
-import { RegisterPayload } from '../../interfaces/RegisterPayload';
 import User from '../../models/userModel';
-import { ISession } from '../../interfaces/Session';
 import jsonwebtoken from 'jsonwebtoken';
-import { AuthContext } from '../../interfaces/AuthContext';
 import { generateUUID } from '../../util/UUID';
 import PasswordRecovery from '../../models/passwordRecovery';
 import { sendMail } from '../../util/Nodemailer';
+import { RegisterPayload, IUser, AuthContext, ISession } from '../../interfaces/Auth';
 const JWT_SECRET = process.env.JWT_SECRET || 'process.env.JWT_SECRET;';
 
 async function registerUser(userPayload: RegisterPayload) {

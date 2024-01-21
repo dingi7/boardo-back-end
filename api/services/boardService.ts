@@ -2,7 +2,6 @@ import Board from '../../models/boardModel';
 import { Types } from 'mongoose';
 import { getUserById } from './auth';
 import { IBoard } from '../../interfaces/BoardInterface';
-import { getOrgById } from './orgService';
 import { writeActivity } from '../../util/ActivityWriter';
 
 async function getBoardsByOrgId(orgId: string) {

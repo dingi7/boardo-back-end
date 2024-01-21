@@ -1,5 +1,5 @@
 import { Document } from 'mongoose';
-import { IUser } from './User';
+import { IUser } from './Auth';
 import { IBoard } from './BoardInterface';
 
 export interface IActivity {
