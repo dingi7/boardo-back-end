@@ -54,11 +54,13 @@ export async function editCard(
     userId: string,
     organizationId: string,
     name?: string,
-    priority?: string
+    priority?: string,
+    dueDate?: Date
 ) {
     const card = (await getCardById(cardId)) as any;
     card.name = name || card.name;
     card.styles.priority = priority || card.styles.priority;
+    card.dueDate = dueDate || card.dueDate;
     await card.save();
     writeActivity({
         user: userId,
