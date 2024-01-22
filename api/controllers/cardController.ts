@@ -77,7 +77,7 @@ cardController
             user._id,
             reqBody.organizationId,
             reqBody?.name,
-            reqBody?.priority
+            reqBody?.priority,
             reqBody?.dueDate
         );
         return c.json(result, 200);
