@@ -33,6 +33,7 @@ async function editOrg(
     orgId: string,
     userId: string,
     name?: string,
+    oldPassword?: string,
     password?: string,
     ownerId?: string
 ) {
@@ -47,6 +48,9 @@ async function editOrg(
         org.name = name;
     }
     if (password) {
+        if (oldPassword !== org.password) {
+            throw new Error('Wrong password');
+        }
         org.password = password;
     }
     if (ownerId) {
@@ -60,8 +64,7 @@ async function deleteOrg(orgId: string, userId: string, orgPassword: string) {
     const org = await getOrgById(orgId, false, true);
     console.log(org.owner, userId, org.owner.equals(userId));
     console.log(org.password, orgPassword);
-    
-    
+
     if (!org) {
         throw new Error('Organization not found');
     }
@@ -103,7 +106,7 @@ async function getOrgById(orgId: string, populate = false, password = false) {
         const org = await Org.findById(new Types.ObjectId(orgId)).select(
             '-password'
         );
-        
+
         if (!org) {
             throw new Error('Organization not found');
         }
@@ -152,7 +155,9 @@ async function getOrgsByMemberId(memberId: string, populate = false) {
 }
 
 async function getAllOrgs() {
-    const orgs = await Org.find({}).select('-owner -members -password -activity').exec();
+    const orgs = await Org.find({})
+        .select('-owner -members -password -activity')
+        .exec();
     if (!orgs) {
         throw new Error('No organizations were found');
     }

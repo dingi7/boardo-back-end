@@ -40,6 +40,7 @@ export interface OrgPayload {
     [key: string]: any;
     name: string;
     password: string;
+    oldPassword?: string;
     owner?: string;
     memberId?: string;
 }

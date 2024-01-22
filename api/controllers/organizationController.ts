@@ -70,6 +70,7 @@ router
             orgId,
             user._id,
             reqBody.name,
+            reqBody.oldPassword,
             reqBody.password,
             reqBody.owner
         );
