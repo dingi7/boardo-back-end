@@ -37,7 +37,7 @@ async function editOrg(
     password?: string,
     ownerId?: string
 ) {
-    const org = await getOrgById(orgId);
+    const org = await getOrgById(orgId, false, true);
     if (!org) {
         throw new Error('Organization not found');
     }
