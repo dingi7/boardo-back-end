@@ -60,6 +60,10 @@ export async function editCard(
     const card = (await getCardById(cardId)) as any;
     card.name = name || card.name;
     card.styles.priority = priority || card.styles.priority;
+    console.log(dueDate);
+    console.log(card.dueDate);
+    
+    
     card.dueDate = dueDate || card.dueDate;
     await card.save();
     writeActivity({

@@ -12,6 +12,7 @@ interface CardPayload {
     organizationId?: string;
     boardId?: string;
     priority?: string;
+    dueDate?: Date;
 }
 
 cardController.post('/cards', async (c: Context) => {
@@ -77,6 +78,7 @@ cardController
             reqBody.organizationId,
             reqBody?.name,
             reqBody?.priority
+            reqBody?.dueDate
         );
         return c.json(result, 200);
     });
