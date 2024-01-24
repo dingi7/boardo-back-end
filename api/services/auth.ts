@@ -4,7 +4,12 @@ import jsonwebtoken from 'jsonwebtoken';
 import { generateUUID } from '../../util/UUID';
 import PasswordRecovery from '../../models/passwordRecovery';
 import { sendMail } from '../../util/Nodemailer';
-import { RegisterPayload, IUser, AuthContext, ISession } from '../../interfaces/Auth';
+import {
+    RegisterPayload,
+    IUser,
+    AuthContext,
+    ISession,
+} from '../../interfaces/Auth';
 const JWT_SECRET = process.env.JWT_SECRET || 'process.env.JWT_SECRET;';
 
 async function registerUser(userPayload: RegisterPayload) {
@@ -27,11 +32,15 @@ async function registerUser(userPayload: RegisterPayload) {
 async function loginUser(userPayload: RegisterPayload) {
     const userByUsername = await User.findOne<IUser>({
         username: userPayload.username,
-    }).populate('joinedOrganizations');
+    })
+        .populate('joinedOrganizations -password')
+        .populate('owner -hashedPassword -joinedOrganizations');
 
     const userByEmail = await User.findOne<IUser>({
         email: userPayload.email,
-    }).populate('joinedOrganizations');
+    })
+        .populate('joinedOrganizations -password')
+        .populate('owner -hashedPassword -joinedOrganizations');
 
     const user = userByUsername || userByEmail;
 
@@ -134,7 +143,7 @@ async function saveResetToken(userEmail: string) {
 async function resetPassword(uuid: string, newPassword: string) {
     try {
         // Find the password recovery token
-        const token : any = await PasswordRecovery.findOne({ uuid });
+        const token: any = await PasswordRecovery.findOne({ uuid });
 
         if (!token) {
             throw new Error('Invalid token');
@@ -170,8 +179,8 @@ async function resetPassword(uuid: string, newPassword: string) {
     }
 }
 
-async function tokenValidarot(uuid:string) {
-    const token : any = await PasswordRecovery.findOne({ uuid });
+async function tokenValidarot(uuid: string) {
+    const token: any = await PasswordRecovery.findOne({ uuid });
     if (!token) {
         throw new Error('Invalid token');
     }
@@ -190,5 +199,5 @@ export {
     getUserByEmail,
     saveResetToken,
     resetPassword,
-    tokenValidarot
+    tokenValidarot,
 };
