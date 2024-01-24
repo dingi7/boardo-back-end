@@ -39,8 +39,10 @@ async function loginUser(userPayload: RegisterPayload) {
     const userByEmail = await User.findOne<IUser>({
         email: userPayload.email,
     })
-        .populate('joinedOrganizations -password')
-        .populate('owner -hashedPassword -joinedOrganizations');
+        .populate('joinedOrganizations')
+        .select('-password')
+        .populate('owner')
+        .select('-hashedPassword -joinedOrganizations').exec();
 
     const user = userByUsername || userByEmail;
 
