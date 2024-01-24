@@ -33,16 +33,20 @@ async function loginUser(userPayload: RegisterPayload) {
     const userByUsername = await User.findOne<IUser>({
         username: userPayload.username,
     })
-        .populate('joinedOrganizations -password')
-        .populate('owner -hashedPassword -joinedOrganizations');
+        .populate('joinedOrganizations')
+        .select('-password')
+        .populate('joinedOrganizations.owner')
+        .select('-hashedPassword -joinedOrganizations')
+        .exec();
 
     const userByEmail = await User.findOne<IUser>({
         email: userPayload.email,
     })
         .populate('joinedOrganizations')
         .select('-password')
-        .populate('owner')
-        .select('-hashedPassword -joinedOrganizations').exec();
+        .populate('joinedOrganizations.owner')
+        .select('-hashedPassword -joinedOrganizations')
+        .exec();
 
     const user = userByUsername || userByEmail;
 
