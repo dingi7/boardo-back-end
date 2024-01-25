@@ -5,7 +5,7 @@ interface IUser extends Document {
     username: string;
     email: string;
     hashedPassword: string;
-    joinedOrganizations: Types.Array<Types.ObjectId>;
+    joinedOrganizations: Types.Array<Types.ObjectId> | string[] ;
 }
 
 const userSchema = new Schema<IUser>({

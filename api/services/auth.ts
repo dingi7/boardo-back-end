@@ -81,16 +81,11 @@ function createSession(user: IUser | any): ISession {
     };
 }
 
-function verifySession(token: string) {
+function verifySession(token: string): ISession {
     const decodedData = jsonwebtoken.verify(token, JWT_SECRET) as ISessionPayload;
 
-    const { _id, username, email, joinedOrganizations } = decodedData;
-
     return {
-        _id,
-        username,
-        email,
-        joinedOrganizations,
+        ...decodedData,
         accessToken: token,
     };
 }
@@ -189,5 +184,5 @@ export {
     checkAuthorization,
     saveResetToken,
     resetPassword,
-    tokenValidator as tokenValidarot,
+    tokenValidator,
 };

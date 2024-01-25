@@ -3,7 +3,7 @@ import {
     loginUser,
     resetPassword,
     saveResetToken,
-    tokenValidarot,
+    tokenValidator,
 } from '../services/auth';
 import { Context, Hono } from 'hono';
 import { RegisterPayload, ResetPassword } from '../../interfaces/Auth';
@@ -53,7 +53,7 @@ router.post('/resetPassword/:uuid', async (c: Context) => {
 
 router.post('/tokenValidator/:uuid', async (c: Context) => {
     const uuid = c.req.param('uuid');
-    await tokenValidarot(uuid);
+    await tokenValidator(uuid);
     return c.json({ message: 'Success' }, 200);
 });
 
