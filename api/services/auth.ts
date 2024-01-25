@@ -108,85 +108,77 @@ async function hashPassword(password: string) {
     return hashedPassword;
 }
 
-async function saveResetToken(userEmail: string) {
+async function saveResetToken(userEmail: string): Promise<string> {
     const user = await findUser({ email: userEmail });
+
     if (!user) {
         throw new Error('User not found');
     }
+
     const uuid = generateUUID();
+    const expiryDate = new Date(Date.now() + 3600000); // 1 hour
+
     const token = new PasswordRecovery({
         user: user._id,
         uuid: uuid,
-        expirity: new Date(Date.now() + 3600000), // 1 hour
+        expiry: expiryDate,
     });
 
     await token.save();
-    await sendMail(
-        'Password recovery',
-        `<p>Dear ${user.firstName},</p>
 
-        <p>This is an automatic email in response to your request to reset your password. If you did not initiate this request, please ignore this email.</p>
-    
-        <p>To reset your password, click on the following link:</p>
-        <p><a href="https://boardo.vercel.app/auth/resetPassword/${uuid}">Reset Your Password Here</a></p>
-    
-        <p>Please note that this link is valid for a limited time. If you did not request this password reset or have any concerns, please contact our support team immediately at <a href="mailto:info@board.site">info@board.site</a>.</p>
-        <br>
-        <p>Best regards,<br><br>
-        Boardo Team</p>`,
-        userEmail
-    );
+    await sendResetPasswordEmail(user.firstName, userEmail, uuid);
+
     return uuid;
 }
 
-async function resetPassword(uuid: string, newPassword: string) {
+async function resetPassword(uuid: string, newPassword: string): Promise<void> {
     try {
-        // Find the password recovery token
-        const token: any = await PasswordRecovery.findOne({ uuid });
+        const token = await tokenValidator(uuid);
 
-        if (!token) {
-            throw new Error('Invalid token');
-        }
-
-        // Check if the token has expired
-        if (Number(token.expiry) < Date.now()) {
-            throw new Error('Token expired');
-        }
-
-        // Find the user by the token's user ID
-        const user = await User.findById(token.user);
+        const user = await getUserById(token.user);
 
         if (!user) {
             throw new Error('User not found');
         }
 
-        // Hash the new password
         const newPasswordHash = await hashPassword(newPassword);
-
-        // Update the user's hashedPassword field
         user.hashedPassword = newPasswordHash;
 
-        // Save the updated user
         await user.save();
-
-        // Delete the password recovery token
         await token.deleteOne();
     } catch (error) {
-        // Handle errors appropriately
         console.error('Error resetting password:', error.message);
         throw error;
     }
 }
 
-async function tokenValidator(uuid: string) {
-    const token: any = await PasswordRecovery.findOne({ uuid });
-    if (!token) {
-        throw new Error('Invalid token');
+async function tokenValidator(uuid: string): Promise<any> {
+    const token = await findPasswordRecoveryToken(uuid);
+
+    if (!token || token.expiry < Date.now()) {
+        throw new Error('Invalid or expired token');
     }
-    if (Number(token.expiry) < Date.now()) {
-        throw new Error('Token expired');
-    }
+
     return token;
+}
+
+async function findPasswordRecoveryToken(uuid: string): Promise<any> {
+    const token = await PasswordRecovery.findOne({ uuid });
+    return token;
+}
+
+async function sendResetPasswordEmail(firstName: string, userEmail: string, uuid: string): Promise<void> {
+    const emailContent = `
+        <p>Dear ${firstName},</p>
+        <p>This is an automatic email in response to your request to reset your password. If you did not initiate this request, please ignore this email.</p>
+        <p>To reset your password, click on the following link:</p>
+        <p><a href="https://boardo.vercel.app/auth/resetPassword/${uuid}">Reset Your Password Here</a></p>
+        <p>Please note that this link is valid for a limited time. If you did not request this password reset or have any concerns, please contact our support team immediately at <a href="mailto:info@board.site">info@board.site</a>.</p>
+        <br>
+        <p>Best regards,<br><br>
+        Boardo Team</p>`;
+
+    await sendMail('Password recovery', emailContent, userEmail);
 }
 
 export {
