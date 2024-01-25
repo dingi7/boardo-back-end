@@ -33,20 +33,28 @@ async function loginUser(userPayload: RegisterPayload) {
     const userByUsername = await User.findOne<IUser>({
         username: userPayload.username,
     })
-        .populate('joinedOrganizations')
-        .select('-password')
-        .populate('joinedOrganizations.owner')
-        .select('-hashedPassword -joinedOrganizations')
-        .exec();
+        .populate({
+        path: 'joinedOrganizations',
+        select: '-password', // Exclude passwords from joinedOrganizations
+        populate: {
+            path: 'owner',
+            select: '-hashedPassword -joinedOrganizations', // Exclude hashedPassword and joinedOrganizations from owner
+        },
+    })
+    .exec();
 
     const userByEmail = await User.findOne<IUser>({
         email: userPayload.email,
     })
-        .populate('joinedOrganizations')
-        .select('-password')
-        .populate('joinedOrganizations.owner')
-        .select('-hashedPassword -joinedOrganizations')
-        .exec();
+        .populate({
+        path: 'joinedOrganizations',
+        select: '-password', // Exclude passwords from joinedOrganizations
+        populate: {
+            path: 'owner',
+            select: '-hashedPassword -joinedOrganizations', // Exclude hashedPassword and joinedOrganizations from owner
+        },
+    })
+    .exec();
 
     const user = userByUsername || userByEmail;
 
