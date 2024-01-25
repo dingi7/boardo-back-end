@@ -54,7 +54,13 @@ async function loginUser(userPayload: RegisterPayload) {
         throw new Error('User not found');
     }
 
+    console.log('userPayload.password:', userPayload.password);
+    console.log('user.hashedPassword:', user.hashedPassword);
+
     await validatePassword(userPayload.password, user.hashedPassword);
+
+    console.log('Password validation successful');
+    
     return createSession(user);
 }
 
