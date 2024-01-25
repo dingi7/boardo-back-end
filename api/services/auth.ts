@@ -9,12 +9,13 @@ import {
     IUser,
     AuthContext,
     ISession,
+    ISessionPayload,
 } from '../../interfaces/Auth';
 const JWT_SECRET = process.env.JWT_SECRET || 'process.env.JWT_SECRET;';
 
 async function registerUser(userPayload: RegisterPayload) {
-    const alUser = await User.findOne({ email: userPayload.email });
-    if (alUser) {
+    const existingUser = await User.findOne({ email: userPayload.email });
+    if (existingUser) {
         throw new Error('User already exists');
     }
     const hashedPassword = await hashPassword(userPayload.password);
@@ -23,38 +24,15 @@ async function registerUser(userPayload: RegisterPayload) {
         username: userPayload.username,
         email: userPayload.email,
         hashedPassword: hashedPassword,
-        joinedOrganizations: [], // Add an empty array for joinedOrganizations
+        joinedOrganizations: [],
     });
     await user.save();
     return createSession(user);
 }
 
 async function loginUser(userPayload: RegisterPayload) {
-    const userByUsername = await User.findOne<IUser>({
-        username: userPayload.username,
-    })
-        .populate({
-        path: 'joinedOrganizations',
-        select: '-password', // Exclude passwords from joinedOrganizations
-        populate: {
-            path: 'owner',
-            select: '-hashedPassword -joinedOrganizations', // Exclude hashedPassword and joinedOrganizations from owner
-        },
-    })
-    .exec();
-
-    const userByEmail = await User.findOne<IUser>({
-        email: userPayload.email,
-    })
-        .populate({
-        path: 'joinedOrganizations',
-        select: '-password', // Exclude passwords from joinedOrganizations
-        populate: {
-            path: 'owner',
-            select: '-hashedPassword -joinedOrganizations', // Exclude hashedPassword and joinedOrganizations from owner
-        },
-    })
-    .exec();
+    const userByUsername = await findUser({ username: userPayload.username });
+    const userByEmail = await findUser({ email: userPayload.email });
 
     const user = userByUsername || userByEmail;
 
@@ -62,22 +40,26 @@ async function loginUser(userPayload: RegisterPayload) {
         throw new Error('User not found');
     }
 
-    console.log('userPayload.password:', userPayload.password);
-    console.log('user.hashedPassword:', user.hashedPassword);
-
     await validatePassword(userPayload.password, user.hashedPassword);
 
-    console.log('Password validation successful');
-    
     return createSession(user);
+}
+
+async function findUser(query: { username?: string; email?: string }): Promise<IUser | null> {
+    return User.findOne<IUser>(query)
+        .populate({
+            path: 'joinedOrganizations',
+            select: '-password',
+            populate: {
+                path: 'owner',
+                select: '-hashedPassword -joinedOrganizations',
+            },
+        })
+        .exec();
 }
 
 async function getUserById(id: string) {
     return await User.findById(id);
-}
-
-async function getUserByEmail(email: string) {
-    return await User.findOne<IUser>({ email });
 }
 
 function checkAuthorization(c: AuthContext): ISession | any {
@@ -100,20 +82,17 @@ function createSession(user: IUser | any): ISession {
 }
 
 function verifySession(token: string) {
-    const data = jsonwebtoken.verify(token, JWT_SECRET) as {
-        _id: string;
-        username: string;
-        email: string;
-        joinedOrganizations: string[];
-    };
-    const session: ISession = {
-        _id: data._id,
-        username: data.username,
-        email: data.email,
-        joinedOrganizations: data.joinedOrganizations,
+    const decodedData = jsonwebtoken.verify(token, JWT_SECRET) as ISessionPayload;
+
+    const { _id, username, email, joinedOrganizations } = decodedData;
+
+    return {
+        _id,
+        username,
+        email,
+        joinedOrganizations,
         accessToken: token,
     };
-    return session;
 }
 
 async function validatePassword(inputPassword: string, storedPassword: string) {
@@ -130,7 +109,7 @@ async function hashPassword(password: string) {
 }
 
 async function saveResetToken(userEmail: string) {
-    const user = await getUserByEmail(userEmail);
+    const user = await findUser({ email: userEmail });
     if (!user) {
         throw new Error('User not found');
     }
@@ -199,7 +178,7 @@ async function resetPassword(uuid: string, newPassword: string) {
     }
 }
 
-async function tokenValidarot(uuid: string) {
+async function tokenValidator(uuid: string) {
     const token: any = await PasswordRecovery.findOne({ uuid });
     if (!token) {
         throw new Error('Invalid token');
@@ -216,8 +195,7 @@ export {
     getUserById,
     verifySession,
     checkAuthorization,
-    getUserByEmail,
     saveResetToken,
     resetPassword,
-    tokenValidarot,
+    tokenValidator as tokenValidarot,
 };

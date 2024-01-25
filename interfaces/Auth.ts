@@ -13,11 +13,14 @@ export interface IUser {
     hashedPassword: string;
 }
 
-export interface ISession {
+export interface ISessionPayload {
     _id: string;
     username: string;
     email: string;
     joinedOrganizations: string[];
+}
+
+export interface ISession extends ISessionPayload {
     accessToken: string;
 }
 
