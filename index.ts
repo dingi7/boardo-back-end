@@ -35,7 +35,7 @@ function configureServer() {
   app.use(prettyJSON());
 
   // cors
-  app.use(cors());
+  app.use(cors({ origin: "*" }));
 
   // Routes
   app.get("/", (c) => c.text("Hello Hono!"));
@@ -60,23 +60,23 @@ function configureServer() {
 }
 
 function startServer(app: Hono) {
-  serve(app, () => {
+  const server = serve(app, () => {
     console.log("Server is running on port 3000");
   });
+  return server;
 }
 
 async function start() {
   await connectToDatabase();
   const app = configureServer();
-  // startServer(app);
-  const server = serve(app, () => {
-    console.log("Server is running on port 3000");
-  });
-  const io = new Server(server as HttpServer, {
-    cors: {
-      origin: "*",
-    },
-  });
+  const server = startServer(app);
+  // const io = new Server(server as HttpServer, {
+  //   cors: {
+  //     origin: "*",
+  //   },
+  // });
+  const io = new Server(server, { cors: { origin: "*" } });
+  // io.attach(3001);
 
   io.on("connection", (socket: any) => {
     socket.on("join-board", (boardId: string) => {
