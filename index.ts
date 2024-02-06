@@ -75,7 +75,13 @@ async function start() {
   });
 
   io.on("connection", (socket: any) => {
+    socket.on("join-board", (boardId: string) => {
+      console.log("joined board " + boardId);
+      socket.join(boardId);
+    });
+
     socket.on("create-card", (data: any, boardId: string) => {
+      console.log("ran " + data.title);
       socket.to(boardId).emit("card-created", data);
     });
 
@@ -86,10 +92,6 @@ async function start() {
     socket.on("create-list", (list: any, boardId: string) => {
       console.log("ran");
       socket.to(boardId).emit("list-created", list);
-    });
-
-    socket.on("join-board", (boardId: string) => {
-      socket.join(boardId);
     });
   });
 }
