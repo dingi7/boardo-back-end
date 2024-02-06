@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import { authHeader } from "./middlewares";
 import { cors } from "hono/cors";
 import { Server } from "socket.io";
+import { Server as HttpServer } from "http";
 
 import api from "./api";
 import dotenv from "dotenv";
@@ -67,8 +68,11 @@ function startServer(app: Hono) {
 async function start() {
   await connectToDatabase();
   const app = configureServer();
-  startServer(app);
-  const io = new Server(3009, {
+  // startServer(app);
+  const server = serve(app, () => {
+    console.log("Server is running on port 3000");
+  });
+  const io = new Server(server as HttpServer, {
     cors: {
       origin: "*",
     },
