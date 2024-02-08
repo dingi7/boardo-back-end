@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { ObjectId, Types } from 'mongoose';
 import Org from '../../models/organizationModel';
 import { getUserById } from './auth';
 
@@ -94,6 +94,26 @@ async function joinOrg(orgId: string, orgPassword: string, userId: string) {
     return org;
 }
 
+async function leaveOrg(orgId: string, userId: string) {
+    const org = await Org.findById(orgId);
+    if (!org) {
+        throw new Error('Organization not found');
+    }
+    if (!org.members.includes(userId as any)) {
+        throw new Error('User not in the organization');
+    }
+    org.members.pull(userId);
+    await org.save();
+    const user = await getUserById(userId);
+    const indexToRemove = user!.joinedOrganizations.findIndex(id  => {
+        return id === userId
+    });
+    user?.joinedOrganizations && user.joinedOrganizations.splice(indexToRemove, 1);
+
+    await user?.save();
+    return org;
+}
+
 async function getOrgById(orgId: string, populate = false, password = false) {
     try {
         if (password) {
@@ -146,6 +166,10 @@ async function getOrgsByMemberId(memberId: string, populate = false) {
                 select: '-hashedPassword -joinedOrganizations',
             },
         })
+        .populate({
+            path: 'owner',
+            select: '-hashedPassword -joinedOrganizations',
+        })
         .exec();
 
     if (!orgs) {
@@ -193,5 +217,6 @@ export {
     addActivityToOrg,
     editOrg,
     deleteOrg,
+    leaveOrg,
     kickMember,
 };

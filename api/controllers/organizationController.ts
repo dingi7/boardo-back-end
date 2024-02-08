@@ -8,6 +8,7 @@ import {
     editOrg,
     getOrgsByMemberId,
     kickMember,
+    leaveOrg,
 } from '../services/orgService';
 import { OrgPayload } from '../../interfaces/Auth';
 
@@ -103,5 +104,18 @@ router.post('/orgs/:id/kickMember', async (c: Context) => {
     const result = await kickMember(orgId, memberId, user._id);
     return c.json(result, 200);
 });
+
+router.post('/orgs/:id/leave', async(c: Context)=> {
+    const orgId = c.req.param('id');
+    const user = checkAuthorization(c);
+    if(!orgId || !user._id){
+        return c.json(
+            { error: 'Missing required fields or unauthorized' },
+            400
+        );
+    }
+    const result = await leaveOrg(orgId, user._id);
+    return c.json(result, 200);
+})
 
 export default router;
