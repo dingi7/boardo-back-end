@@ -95,6 +95,7 @@ async function joinOrg(orgId: string, orgPassword: string, userId: string) {
 }
 
 async function leaveOrg(orgId: string, userId: string) {
+
     const org = await Org.findById(orgId);
     if (!org) {
         throw new Error('Organization not found');
@@ -109,8 +110,11 @@ async function leaveOrg(orgId: string, userId: string) {
         return id === userId
     });
     user?.joinedOrganizations && user.joinedOrganizations.splice(indexToRemove, 1);
-
     await user?.save();
+    if(org.members.length === 0){
+        await org.deleteOne();
+        return {message: 'Organization deleted'}
+    }
     return org;
 }
 
