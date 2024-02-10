@@ -6,6 +6,8 @@ import mongoose from 'mongoose';
 import { authHeader } from './middlewares';
 import { cors } from 'hono/cors';
 import { Server } from 'socket.io';
+import type { Server as HTTPSServer } from "node:http";
+import { Server as SocketIOServer } from "socket.io";
 
 import api from './api';
 import dotenv from 'dotenv';
@@ -67,28 +69,6 @@ async function start() {
     await connectToDatabase();
     const app = configureServer();
     const server = startServer(app);
-    const io = new Server(server, { cors: { origin: '*' } });
-
-    io.on('connection', (socket: any) => {
-        socket.on('join-board', (boardId: string) => {
-            console.log('joined board ' + boardId);
-            socket.join(boardId);
-        });
-
-        socket.on('create-card', (data: any, boardId: string) => {
-            console.log('ran ' + data);
-            socket.to(boardId).emit('card-created', data);
-        });
-
-        socket.on('delete-card', (cardId: string, boardId: string) => {
-            socket.to(boardId).emit('card-deleted', cardId);
-        });
-
-        socket.on('create-list', (list: any, boardId: string) => {
-            console.log('ran');
-            socket.to(boardId).emit('list-created', list);
-        });
-    });
 }
 
 start();
