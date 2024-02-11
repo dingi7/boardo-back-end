@@ -22,7 +22,7 @@ async function createOrg(name: string, password: string, owner: string) {
         user.joinedOrganizations.push(org._id);
         await user.save();
 
-        return org;
+        return (await org.populate('owner', '-hashedPassword -joinedOrganizations')).populate('members', '-hashedPassword -joinedOrganizations');
     } catch (err: any) {
         console.error('Error in createOrg:', err.message);
         throw err;
