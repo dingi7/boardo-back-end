@@ -176,6 +176,17 @@ async function sendResetPasswordEmail(firstName: string, userEmail: string, uuid
     await sendMail('Password recovery', emailContent, userEmail);
 }
 
+async function changePassword(oldPassword:string, newPassword: string, userId: string) {
+    const user = await getUserById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+    await validatePassword(oldPassword, user.hashedPassword);
+    const newPasswordHash = await hashPassword(newPassword);
+    user.hashedPassword = newPasswordHash;
+    await user.save();
+}
+
 export {
     registerUser,
     loginUser,
@@ -185,4 +196,5 @@ export {
     saveResetToken,
     resetPassword,
     tokenValidator,
+    changePassword
 };

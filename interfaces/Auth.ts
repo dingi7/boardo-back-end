@@ -40,6 +40,12 @@ export interface ResetPassword {
     token?: string;
 }
 
+export interface ChangePassword {
+    [key: string]: any;
+    oldPassword: string;
+    newPassword: string;
+}
+
 export interface OrgPayload {
     [key: string]: any;
     name: string;
