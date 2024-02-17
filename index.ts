@@ -5,14 +5,13 @@ import { logger } from 'hono/logger';
 import mongoose from 'mongoose';
 import { authHeader } from './middlewares';
 import { cors } from 'hono/cors';
-import { Server } from 'socket.io';
-import type { Server as HTTPSServer } from "node:http";
-import { Server as SocketIOServer } from "socket.io";
 
 import api from './api';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+
 
 async function connectToDatabase() {
     const databaseUrl: string = process.env.MONGODB_URI || "mongodb://localhost:27017/hono";

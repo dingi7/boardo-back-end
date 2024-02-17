@@ -1,8 +1,10 @@
 import Board from '../../models/boardModel';
-import { Types } from 'mongoose';
+import { ObjectId, Types } from 'mongoose';
 import { getUserById } from './auth';
 import { IBoard } from '../../interfaces/BoardInterface';
 import { writeActivity } from '../../util/ActivityWriter';
+import pusher from '../../util/PusherUtil';
+
 
 async function getBoardsByOrgId(orgId: string) {
     try {
@@ -103,6 +105,11 @@ async function editBoard(
             await list.save();
         }
     }
+
+    pusher.trigger(board._id.toString(), 'board-edited', 
+        board,
+    );
+    console.log('pusher triggered for board-edited event');
 
     await board.save();
     return board;

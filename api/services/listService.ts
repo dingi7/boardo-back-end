@@ -3,6 +3,9 @@ import List from '../../models/listModel';
 import { getBoardById, removeListFromBoard } from './boardService';
 import { writeActivity } from '../../util/ActivityWriter';
 
+import pusher from '../../util/PusherUtil';
+import { ICard } from '../../interfaces/BoardInterface';
+
 async function getListById(listId: string) {
     try {
         const list = await List.findById(listId);
@@ -26,6 +29,11 @@ async function createList(name: string, boardId: string, _id: string) {
     await list.save();
     board.lists.push(list._id);
     await board.save();
+    
+    pusher.trigger(board._id.toString(), 'list-created', 
+        list
+    );
+    console.log('pusher triggered for list-created event');
 
     writeActivity({
         user: _id,
@@ -40,6 +48,10 @@ async function deleteList(listId: string, userId: string) {
     const list = await getListById(listId);
     await removeListFromBoard(list.board._id.toString(), listId, userId);
     await list.deleteOne();
+    pusher.trigger(list.board.toString(), 'list-deleted', 
+        list
+    );
+    console.log('pusher triggered for list-deleted event');
     return list;
 }
 
@@ -58,12 +70,16 @@ async function editList(
     });
     list.name = name;
     await list.save();
+    pusher.trigger(list.board.toString(), 'list-edited', list);
+    console.log('pusher triggered for list-edited event');
     return list;
 }
 
-async function addCardToList(listId: string, cardId: string) {
+async function addCardToList(listId: string, card: ICard | any) {
     const list = await getListById(listId);
-    list.cards.push(new mongoose.Types.ObjectId(cardId));
+    list.cards.push(new mongoose.Types.ObjectId(card._id));
+    pusher.trigger(list.board.toString(), 'card-added', card);
+    console.log('pusher triggered for card-added event');
     await list.save();
     return list;
 }

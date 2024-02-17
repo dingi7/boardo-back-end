@@ -13,7 +13,11 @@ interface IList extends Document {
     cards: ICard[];
 }
 
-interface ICard extends Document {
+export interface ICard extends Document {
     name: string;
     list: string;
+    dueDate: Date;
+    styles: {
+        priority: string;
+    };
 }

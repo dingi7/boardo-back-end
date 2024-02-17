@@ -1,6 +1,7 @@
 import Card from '../../models/cardModel';
 import { writeActivity } from '../../util/ActivityWriter';
-import { addCardToList } from './listService';
+import pusher from '../../util/PusherUtil';
+import { addCardToList, getListById } from './listService';
 
 export async function getCardById(cardId: string) {
     try {
@@ -24,8 +25,8 @@ export async function createCard(
         name,
         list: listId,
     });
-    await addCardToList(listId, card._id);
     await card.save();
+    await addCardToList(listId, card);
     writeActivity({
         user: userId,
         organization: organizationId,
@@ -40,7 +41,12 @@ export async function deleteCardById(
     organizationId: string
 ) {
     const card = await getCardById(cardId);
+    const list = await getListById(card.list.toString());
     await card.deleteOne();
+    pusher.trigger(list.board.toString(), 'card-deleted', 
+        card,
+    );
+    console.log('pusher triggered for card-deleted event');
     writeActivity({
         user: userId,
         organization: organizationId,
@@ -60,12 +66,14 @@ export async function editCard(
     const card = (await getCardById(cardId)) as any;
     card.name = name || card.name;
     card.styles.priority = priority || card.styles.priority;
-    console.log(dueDate);
-    console.log(card.dueDate);
-    
-    
+
     card.dueDate = dueDate || card.dueDate;
     await card.save();
+    const list = await getListById(card.list.toString());
+    pusher.trigger(list.board.toString(), 'card-edited', 
+        card,
+    );
+    console.log('pusher triggered for card-edited event');
     writeActivity({
         user: userId,
         organization: organizationId,
