@@ -11,7 +11,7 @@ import {
     ISession,
     ISessionPayload,
 } from '../../interfaces/Auth';
-const JWT_SECRET = process.env.JWT_SECRET || 'process.env.JWT_SECRET!@#'; // braking change
+const JWT_SECRET = process.env.JWT_SECRET || 'process.env.JWT_SECRET;'; // braking change
 
 async function registerUser(userPayload: RegisterPayload) {
     const existingUser = await User.findOne({ email: userPayload.email });
