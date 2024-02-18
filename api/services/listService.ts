@@ -19,8 +19,8 @@ async function getListById(listId: string) {
     }
 }
 
-async function createList(name: string, boardId: string, _id: string) {
-    const board = await getBoardById(boardId, _id);
+async function createList(name: string, boardId: string, userId: string) {
+    const board = await getBoardById(boardId, userId);
     const list = new List({
         name: name,
         board: boardId,
@@ -29,14 +29,15 @@ async function createList(name: string, boardId: string, _id: string) {
     await list.save();
     board.lists.push(list._id);
     await board.save();
-    
-    pusher.trigger(board._id.toString(), 'list-created', 
-        list
-    );
+
+    pusher.trigger(board._id.toString(), 'list-created', {
+        sender: userId,
+        list,
+    });
     console.log('pusher triggered for list-created event');
 
     writeActivity({
-        user: _id,
+        user: userId,
         organization: board.owner._id,
         board: board._id,
         action: 'Created list ' + name + ' on board ' + board.name,
@@ -48,9 +49,10 @@ async function deleteList(listId: string, userId: string) {
     const list = await getListById(listId);
     await removeListFromBoard(list.board._id.toString(), listId, userId);
     await list.deleteOne();
-    pusher.trigger(list.board.toString(), 'list-deleted', 
-        list
-    );
+    pusher.trigger(list.board.toString(), 'list-deleted', {
+        sender: userId,
+        list,
+    });
     console.log('pusher triggered for list-deleted event');
     return list;
 }
@@ -70,15 +72,25 @@ async function editList(
     });
     list.name = name;
     await list.save();
-    pusher.trigger(list.board.toString(), 'list-edited', list);
+    pusher.trigger(list.board.toString(), 'list-edited', {
+        sender: userId,
+        list,
+    });
     console.log('pusher triggered for list-edited event');
     return list;
 }
 
-async function addCardToList(listId: string, card: ICard | any) {
+async function addCardToList(
+    listId: string,
+    card: ICard | any,
+    userId: string
+) {
     const list = await getListById(listId);
     list.cards.push(new mongoose.Types.ObjectId(card._id));
-    pusher.trigger(list.board.toString(), 'card-added', card);
+    pusher.trigger(list.board.toString(), 'card-added', {
+        sender: userId,
+        card,
+    });
     console.log('pusher triggered for card-added event');
     await list.save();
     return list;

@@ -5,7 +5,6 @@ import { IBoard } from '../../interfaces/BoardInterface';
 import { writeActivity } from '../../util/ActivityWriter';
 import pusher from '../../util/PusherUtil';
 
-
 async function getBoardsByOrgId(orgId: string) {
     try {
         const boards = await Board.find({ owner: orgId });
@@ -70,7 +69,11 @@ async function editBoard(
             user: userId,
             organization: board.owner,
             board: board._id,
-            action: name ? `Renamed the board to ${name}` : backgroundUrl ? 'Changed the background image' : 'Edited the board',
+            action: name
+                ? `Renamed the board to ${name}`
+                : backgroundUrl
+                ? 'Changed the background image'
+                : 'Edited the board',
         });
     }
 
@@ -106,9 +109,10 @@ async function editBoard(
         }
     }
 
-    pusher.trigger(board._id.toString(), 'board-edited', 
+    pusher.trigger(board._id.toString(), 'board-edited', {
+        sender: userId,
         board,
-    );
+    });
     console.log('pusher triggered for board-edited event');
 
     await board.save();

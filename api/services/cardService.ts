@@ -26,7 +26,7 @@ export async function createCard(
         list: listId,
     });
     await card.save();
-    await addCardToList(listId, card);
+    await addCardToList(listId, card, userId);
     writeActivity({
         user: userId,
         organization: organizationId,
@@ -43,9 +43,10 @@ export async function deleteCardById(
     const card = await getCardById(cardId);
     const list = await getListById(card.list.toString());
     await card.deleteOne();
-    pusher.trigger(list.board.toString(), 'card-deleted', 
+    pusher.trigger(list.board.toString(), 'card-deleted', {
+        sender: userId,
         card,
-    );
+    });
     console.log('pusher triggered for card-deleted event');
     writeActivity({
         user: userId,
@@ -70,9 +71,7 @@ export async function editCard(
     card.dueDate = dueDate || card.dueDate;
     await card.save();
     const list = await getListById(card.list.toString());
-    pusher.trigger(list.board.toString(), 'card-edited', 
-        card,
-    );
+    pusher.trigger(list.board.toString(), 'card-edited', {sender: userId, card});
     console.log('pusher triggered for card-edited event');
     writeActivity({
         user: userId,
