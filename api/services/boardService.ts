@@ -109,9 +109,11 @@ async function editBoard(
         }
     }
 
+    const populatedBoard = await board.populate('lists.cards');
+
     pusher.trigger(board._id.toString(), 'board-edited', {
         sender: userId,
-        board,
+        board: populatedBoard,
     });
     console.log('pusher triggered for board-edited event');
 
