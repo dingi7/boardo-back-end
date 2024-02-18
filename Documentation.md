@@ -1,3 +1,11 @@
+## Quick Start
+
+1. Clone the repository.
+2. Install dependencies with `npm install`.
+3. Run the application with `npm start`.
+4. Access the API endpoints using a tool like `curl` or a REST client.
+
+
 # API Endpoints Documentation
 
 ## Board Controller (`boardController.ts`)
