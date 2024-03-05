@@ -91,7 +91,7 @@ async function joinOrg(orgId: string, orgPassword: string, userId: string) {
     const user = await getUserById(userId);
     user?.joinedOrganizations.push(orgId);
     await user?.save();
-    return org;
+    return org.populate('members');
 }
 
 async function leaveOrg(orgId: string, userId: string) {
