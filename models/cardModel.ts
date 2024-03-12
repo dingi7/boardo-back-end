@@ -15,7 +15,7 @@ const cardSchema = new Schema<ICard>({
     list: { type: Types.ObjectId as any, ref: 'List', required: true }, // Explicitly cast Types.ObjectId
     dueDate: { type: Date },
     styles: {
-        priority: { type: String, default: 'normal' }, 
+        priority: { type: String, default: 'Normal' }, 
     },
 });
 
