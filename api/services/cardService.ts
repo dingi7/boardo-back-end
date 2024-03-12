@@ -67,11 +67,17 @@ export async function editCard(
     const card = (await getCardById(cardId)) as any;
     card.name = name || card.name;
     card.styles.priority = priority || card.styles.priority;
-
-    card.dueDate = dueDate || card.dueDate;
+    if (dueDate === null) {
+        card.dueDate = null;
+    } else {
+        card.dueDate = dueDate || card.dueDate;
+    }
     await card.save();
     const list = await getListById(card.list.toString());
-    pusher.trigger(list.board.toString(), 'card-edited', {sender: userId, card});
+    pusher.trigger(list.board.toString(), 'card-edited', {
+        sender: userId,
+        card,
+    });
     console.log('pusher triggered for card-edited event');
     writeActivity({
         user: userId,
