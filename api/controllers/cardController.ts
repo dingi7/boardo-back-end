@@ -16,70 +16,41 @@ interface CardPayload {
 }
 
 cardController.post('/cards', async (c: Context) => {
-    const reqBody = await c.req.json<CardPayload>();
+    const { content, listId, organizationId }: CardPayload = await c.req.json();
     const user = checkAuthorization(c);
-    if (
-        !reqBody.content ||
-        !reqBody.listId ||
-        !user?._id ||
-        !reqBody.organizationId
-    ) {
+
+    if (!content || !listId || !user?._id || !organizationId) {
         return c.json({ error: 'Missing required fields' }, 400);
     }
-    const content = reqBody['content'].toString();
-    const listId = reqBody['listId'].toString();
-    const result = await createCard(
-        content,
-        listId,
-        user._id,
-        reqBody.organizationId
-    );
+
+    const result = await createCard(content, listId, user._id, organizationId);
     return c.json(result, 201);
 });
 
 cardController
     .delete('/cards/:cardId', async (c: Context) => {
-        const reqBody = await c.req.json();
+        const { boardId, organizationId } = await c.req.json();
         const cardId = c.req.param('cardId');
         const user = checkAuthorization(c);
-        if (
-            !cardId ||
-            !user?._id ||
-            !reqBody.boardId ||
-            !reqBody.organizationId
-        ) {
-            return c.json(
-                { error: 'Missing required fields or unauthorized' },
-                400
-            );
+
+        if (!cardId || !user?._id || !boardId || !organizationId) {
+            return c.json({ error: 'Missing required fields or unauthorized' }, 400);
         }
-        const boardId = reqBody['boardId'].toString();
+
         await getBoardById(boardId, user?._id);
-        const result = await deleteCardById(
-            cardId,
-            user!._id,
-            reqBody.organizationId
-        );
+        const result = await deleteCardById(cardId, user!._id, organizationId);
         return c.json(result, 200);
     })
     .put(async (c: Context) => {
-        const reqBody = await c.req.json<CardPayload>();
+        const { organizationId, name, priority, dueDate }: CardPayload = await c.req.json();
         const cardId = c.req.param('cardId');
         const user = checkAuthorization(c);
-        if (!cardId || !user?._id || !reqBody.organizationId) {
-            return c.json(
-                { error: 'Missing required fields or unauthorized' },
-                400
-            );
+
+        if (!cardId || !user?._id || !organizationId) {
+            return c.json({ error: 'Missing required fields or unauthorized' }, 400);
         }
-        const result = await editCard(
-            cardId,
-            user._id,
-            reqBody.organizationId,
-            reqBody?.name,
-            reqBody?.priority,
-            reqBody?.dueDate
-        );
+
+        const result = await editCard(cardId, user._id, organizationId, name, priority, dueDate);
         return c.json(result, 200);
     });
 

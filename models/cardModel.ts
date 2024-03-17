@@ -7,7 +7,6 @@ interface ICard extends Document {
     styles: {
         priority: string;
     };
-    // Add other properties as needed
 }
 
 const cardSchema = new Schema<ICard>({
