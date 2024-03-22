@@ -1,6 +1,6 @@
 import { Context, Next } from 'hono';
-import { AuthContext } from './interfaces/AuthContext';
 import { verifySession } from './api/services/auth';
+import { AuthContext } from './interfaces/Auth';
 
 export async function authHeader(c: AuthContext, next: Next) {
     const token = c.req.header('x-authorization');

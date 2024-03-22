@@ -1,5 +1,4 @@
 import { Context } from 'hono';
-import { ObjectId } from 'mongoose';
 
 export interface AuthContext extends Context {
     user?: ISession;
