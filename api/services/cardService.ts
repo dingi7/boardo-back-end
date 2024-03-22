@@ -61,6 +61,7 @@ export async function editCard(
     userId: string,
     organizationId: string,
     name?: string,
+    description?: string,
     priority?: string,
     dueDate?: Date
 ) {

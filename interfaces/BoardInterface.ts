@@ -20,4 +20,5 @@ export interface ICard extends Document {
     styles: {
         priority: string;
     };
+    description: string;
 }

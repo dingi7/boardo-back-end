@@ -6,13 +6,14 @@ import { getBoardById } from '../services/boardService';
 const cardController = new Hono();
 
 interface CardPayload {
-    [key: string]: any; // Adding index signature
+    [key: string]: any;
     content: string;
     listId: string;
     organizationId?: string;
     boardId?: string;
     priority?: string;
     dueDate?: Date;
+    description?: string;
 }
 
 cardController.post('/cards', async (c: Context) => {
@@ -42,7 +43,7 @@ cardController
         return c.json(result, 200);
     })
     .put(async (c: Context) => {
-        const { organizationId, name, priority, dueDate }: CardPayload = await c.req.json();
+        const { organizationId, name, priority, dueDate, description }: CardPayload = await c.req.json();
         const cardId = c.req.param('cardId');
         const user = checkAuthorization(c);
 
@@ -50,7 +51,7 @@ cardController
             return c.json({ error: 'Missing required fields or unauthorized' }, 400);
         }
 
-        const result = await editCard(cardId, user._id, organizationId, name, priority, dueDate);
+        const result = await editCard(cardId, user._id, organizationId, name, description, priority, dueDate);
         return c.json(result, 200);
     });
 

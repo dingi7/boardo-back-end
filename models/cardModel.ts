@@ -7,6 +7,7 @@ interface ICard extends Document {
     styles: {
         priority: string;
     };
+    description: string;
 }
 
 const cardSchema = new Schema<ICard>({
@@ -14,8 +15,9 @@ const cardSchema = new Schema<ICard>({
     list: { type: Types.ObjectId as any, ref: 'List', required: true }, // Explicitly cast Types.ObjectId
     dueDate: { type: Date },
     styles: {
-        priority: { type: String, default: 'Normal' }, 
+        priority: { type: String, default: 'Normal' },
     },
+    description: { type: String },
 });
 
 const Card = model<ICard>('Card', cardSchema);
