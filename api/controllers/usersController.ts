@@ -6,6 +6,7 @@ import {
     tokenValidator,
     checkAuthorization,
     changePassword,
+    getUserById,
 
 } from '../services/auth';
 import { Context, Hono } from 'hono';
@@ -90,9 +91,13 @@ router.put('/updateCredentials', async (c: Context) => {
         return c.json({ error: 'Missing required fields' }, 400);
     }
     try {
-        user.username = reqBody.username ?? user.username,
-        user.email = reqBody.email ?? user.email
-        await user.save()
+        const userDoc = await getUserById(user._id)
+        if (!userDoc) {
+            return c.json({ error: 'User not found' }, 404);
+        }
+        userDoc.username = reqBody.username ?? user.username,
+        userDoc.email = reqBody.email ?? user.email
+        await userDoc.save()
         return c.json({ message: 'Success' }, 200);
     } catch (err) {
         return c.json({ error: err.message }, 400);
