@@ -92,7 +92,7 @@ router.put('/updateCredentials', async (c: Context) => {
     try {
         user.username = reqBody.username ?? user.username,
         user.email = reqBody.email ?? user.email
-        await user.save
+        await user.save()
         return c.json({ message: 'Success' }, 200);
     } catch (err) {
         return c.json({ error: err.message }, 400);
