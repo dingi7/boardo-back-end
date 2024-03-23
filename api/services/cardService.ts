@@ -67,6 +67,7 @@ export async function editCard(
 ) {
     const card = (await getCardById(cardId)) as any;
     card.name = name || card.name;
+    card.description = description || card.description;
     card.styles.priority = priority || card.styles.priority;
     if (dueDate === null) {
         card.dueDate = null;
