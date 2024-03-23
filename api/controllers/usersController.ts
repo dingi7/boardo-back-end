@@ -6,12 +6,14 @@ import {
     tokenValidator,
     checkAuthorization,
     changePassword,
+
 } from '../services/auth';
 import { Context, Hono } from 'hono';
 import {
     ChangePassword,
     RegisterPayload,
     ResetPassword,
+    UpdateUserCredentials
 } from '../../interfaces/Auth';
 const router = new Hono();
 
@@ -81,4 +83,19 @@ router.post('/changePassword', async (c: Context) => {
     }
 });
 
+router.put('/updateCredentials', async (c: Context) => {
+    const user = checkAuthorization(c);
+    const reqBody = await c.req.json<UpdateUserCredentials>();
+    if (!reqBody.username || !reqBody.email) {
+        return c.json({ error: 'Missing required fields' }, 400);
+    }
+    try {
+        user.username = reqBody.username ?? user.username,
+        user.email = reqBody.email ?? user.email
+        await user.save
+        return c.json({ message: 'Success' }, 200);
+    } catch (err) {
+        return c.json({ error: err.message }, 400);
+    }
+})
 export default router;

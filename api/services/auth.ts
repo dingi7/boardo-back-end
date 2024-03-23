@@ -10,6 +10,7 @@ import {
     AuthContext,
     ISession,
     ISessionPayload,
+
 } from '../../interfaces/Auth';
 const JWT_SECRET = process.env.JWT_SECRET || 'process.env.JWT_SECRET;'; // braking change
 
@@ -44,6 +45,8 @@ async function loginUser(userPayload: RegisterPayload) {
 
     return createSession(user);
 }
+
+
 
 async function findUser(query: { username?: string; email?: string }): Promise<IUser | null> {
     return User.findOne<IUser>(query)
@@ -196,5 +199,5 @@ export {
     saveResetToken,
     resetPassword,
     tokenValidator,
-    changePassword
+    changePassword,
 };

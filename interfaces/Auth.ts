@@ -53,3 +53,8 @@ export interface OrgPayload {
     owner?: string;
     memberId?: string;
 }
+
+export interface UpdateUserCredentials {
+    username: string,
+    email: string
+}
