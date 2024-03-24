@@ -22,7 +22,9 @@ async function createOrg(name: string, password: string, owner: string) {
         user.joinedOrganizations.push(org._id);
         await user.save();
 
-        return (await org.populate('owner', '-hashedPassword -joinedOrganizations')).populate('members', '-hashedPassword -joinedOrganizations');
+        return (
+            await org.populate('owner', '-hashedPassword -joinedOrganizations')
+        ).populate('members', '-hashedPassword -joinedOrganizations');
     } catch (err: any) {
         console.error('Error in createOrg:', err.message);
         throw err;
@@ -76,7 +78,10 @@ async function deleteOrg(orgId: string, userId: string, orgPassword: string) {
 }
 
 async function joinOrg(orgId: string, orgPassword: string, userId: string) {
-    const org = await Org.findById(orgId);
+    const org = await Org.findById(orgId).populate({
+        path: 'owner',
+        select: '-hashedPassword -joinedOrganizations',
+    });
     if (!org) {
         throw new Error('Organization not found');
     }
@@ -95,7 +100,6 @@ async function joinOrg(orgId: string, orgPassword: string, userId: string) {
 }
 
 async function leaveOrg(orgId: string, userId: string) {
-
     const org = await Org.findById(orgId);
     if (!org) {
         throw new Error('Organization not found');
@@ -106,14 +110,15 @@ async function leaveOrg(orgId: string, userId: string) {
     org.members.pull(userId);
     await org.save();
     const user = await getUserById(userId);
-    const indexToRemove = user!.joinedOrganizations.findIndex(id  => {
-        return id === userId
+    const indexToRemove = user!.joinedOrganizations.findIndex((id) => {
+        return id === userId;
     });
-    user?.joinedOrganizations && user.joinedOrganizations.splice(indexToRemove, 1);
+    user?.joinedOrganizations &&
+        user.joinedOrganizations.splice(indexToRemove, 1);
     await user?.save();
-    if(org.members.length === 0){
+    if (org.members.length === 0) {
         await org.deleteOne();
-        return {message: 'Organization deleted'}
+        return { message: 'Organization deleted' };
     }
     return org;
 }
