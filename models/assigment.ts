@@ -7,7 +7,7 @@ interface IAssigment extends Document {
 }
 
 const assigmentSchema = new Schema<IAssigment>({
-    user: { type: Schema.Types.ObjectId, ref: 'Board', required: true },
+    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     card: { type: Schema.Types.ObjectId, ref: 'Card', required: true },
 });
 
