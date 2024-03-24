@@ -27,7 +27,8 @@ async function getUserAssigments(userId: string) {
 
 async function getCardAssigments(cardId: string){
     try {
-        const assigments = await Assigment.find({ card: cardId }).populate('user', '-hashedPassword -joinedOrganizations');
+        //const assigments = await Assigment.find({ card: cardId }).populate('user', '-hashedPassword -joinedOrganizations');
+        const assigments = await Assigment.find({ card: cardId }).populate('user')
         return assigments;
     } catch (err) {
         throw err;
