@@ -4,7 +4,7 @@ import {
     deleteAssigment,
     getCardAssigments,
     getUserAssigments,
-} from '../services/assigment';
+} from '../services/assignment';
 import { checkAuthorization } from '../services/auth';
 
 const assigmentController = new Hono();
@@ -15,7 +15,7 @@ interface AssigmentPayload {
     card: string;
 }
 
-assigmentController.get('/assigments', async (c) => {
+assigmentController.get('/assignments', async (c) => {
     const user = checkAuthorization(c);
     if (!user?._id) {
         return c.json(
@@ -24,11 +24,11 @@ assigmentController.get('/assigments', async (c) => {
         );
     }
 
-    const assigments = await getUserAssigments(user._id)  ;
-    return c.json(assigments, 200);
+    const assignments = await getUserAssigments(user._id)  ;
+    return c.json(assignments, 200);
 });
 
-assigmentController.get('/assigments/:cardId', async (c) => {
+assigmentController.get('/assignments/:cardId', async (c) => {
     const cardId = c.req.param('cardId');
     const user = checkAuthorization(c);
     if (!cardId ||!user?._id) {
@@ -38,18 +38,18 @@ assigmentController.get('/assigments/:cardId', async (c) => {
         );
     }
 
-    const assigments = await getCardAssigments(cardId)  ;
-    return c.json(assigments, 200);
+    const assignments = await getCardAssigments(cardId)  ;
+    return c.json(assignments, 200);
 });
 
-assigmentController.post('/assigments', async (c) => {
+assigmentController.post('/assignments', async (c) => {
     checkAuthorization(c);
     const { user, card }: AssigmentPayload = await c.req.json();
     const result = await createAssigment(user, card);
     return c.json(result, 201);
 });
 
-assigmentController.delete('/assigments/:assigmentId', async (c) => {
+assigmentController.delete('/assignments/:assigmentId', async (c) => {
     const assigmentId = c.req.param('assigmentId');
     const user = checkAuthorization(c);
     if (!assigmentId || !user?._id) {
