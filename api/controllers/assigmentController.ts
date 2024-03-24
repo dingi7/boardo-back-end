@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import {
     createAssigment,
     deleteAssigment,
+    getCardAssigments,
     getUserAssigments,
 } from '../services/assigment';
 import { checkAuthorization } from '../services/auth';
@@ -23,7 +24,21 @@ assigmentController.get('/assigments', async (c) => {
         );
     }
 
-    const assigments = await getUserAssigments(user._id);
+    const assigments = await getUserAssigments(user._id)  ;
+    return c.json(assigments, 200);
+});
+
+assigmentController.get('/assigments/:cardId', async (c) => {
+    const cardId = c.req.param('cardId');
+    const user = checkAuthorization(c);
+    if (!cardId ||!user?._id) {
+        return c.json(
+            { error: 'Missing required fields or unauthorized' },
+            400
+        );
+    }
+
+    const assigments = await getCardAssigments(cardId)  ;
     return c.json(assigments, 200);
 });
 

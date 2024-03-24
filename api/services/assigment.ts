@@ -25,4 +25,13 @@ async function getUserAssigments(userId: string) {
     }
 }
 
-export { createAssigment, deleteAssigment, getUserAssigments };
+async function getCardAssigments(cardId: string){
+    try {
+        const assigments = await Assigment.find({ card: cardId }).populate('user', '-hashedPassword -joinedOrganizations');
+        return assigments;
+    } catch (err) {
+        throw err;
+    }
+}
+
+export { createAssigment, deleteAssigment, getUserAssigments, getCardAssigments };
